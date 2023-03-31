@@ -1,11 +1,11 @@
 {
-  "name": "lineit",
+  "name": "mindup",
   "version": "1.0.0",
   "description": "",
-  "main": "lineit.js",
+  "main": "mindup.js",
   "scripts": {
     "build:ts": "tsc",
-    "build:scss": "sass --no-source-map src/lineit.scss lineit.css"
+    "build:scss": "sass --no-source-map src/mindup.scss mindup.css"
   },
   "author": "",
   "license": "ISC",

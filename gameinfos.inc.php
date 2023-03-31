@@ -13,32 +13,32 @@
 $gameinfos = [ 
 
 // Name of the game in English (will serve as the basis for translation) 
-'game_name' => "Line It",
+'game_name' => "Mind Up!",
 
 // Game designer (or game designers, separated by commas)
-'designer' => 'Tim Juretzki',       
+'designer' => 'Maxime Rambourg',       
 
 // Game artist (or game artists, separated by commas)
-'artist' => 'Joey & Grumpy',         
+'artist' => 'Christine Alcouffe',         
 
 // Year of FIRST publication of this game. Can be negative.
 'year' => 2023,                 
 
 // Game publisher (use empty string if there is no publisher)
-'publisher' => 'Gigamic',
+'publisher' => 'Catch Up Games',
 
 // Url of game publisher website
-'publisher_website' => 'http://www.gigamic.com',
+'publisher_website' => 'http://www.catchupgames.com/',
 
 // Board Game Geek ID of the publisher
-'publisher_bgg_id' => 155,
+'publisher_bgg_id' => 28651,
 
 // Board game geek ID of the game
-'bgg_id' => 0,
+'bgg_id' => 377515,
 
 
 // Players configuration that can be played (ex: 2 to 4 players)
-'players' => [2,3,4,5],    
+'players' => [3,4,5,6],    
 
 // Suggest players to play with this number of players. Must be null if there is no such advice, or if there is only one possible player configuration.
 // NB: the automatic lobby will try first the lowest number of players if this is not specified. So you _have to_ specify this parameter if the lowest player number is not compatible with the default options.
@@ -50,7 +50,7 @@ $gameinfos = [
 
 
 // Estimated game duration, in minutes (used only for the launch, afterward the real duration is computed)
-'estimated_duration' => 30,           
+'estimated_duration' => 20,           
 
 // Time in second add to a player when "giveExtraTime" is called (speed profile = fast)
 'fast_additional_time' => 30,           
@@ -67,7 +67,7 @@ $gameinfos = [
 // Note: if you are NOT using any tie breaker, leave the empty string.
 //
 // Example: 'tie_breaker_description' => totranslate( "Number of remaining cards in hand" ),
-'tie_breaker_description' => "",
+'tie_breaker_description' => totranslate("Last round points"),
 
 // If in the game, all losers are equal (no score to rank them or explicit in the rules that losers are not ranked between them), set this to true 
 // The game end result will display "Winner" for the 1st player and "Loser" for all other players
@@ -88,16 +88,16 @@ $gameinfos = [
 'language_dependency' => false,
 
 // Complexity of the game, from 0 (extremely simple) to 5 (extremely complex)
-'complexity' => 1,    
+'complexity' => 2,    
 
 // Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
 'luck' => 3,    
 
 // Strategy of the game, from 0 (no strategy can be setup) to 5 (totally based on strategy)
-'strategy' => 1,    
+'strategy' => 2,    
 
 // Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-'diplomacy' => 1,    
+'diplomacy' => 3,    
 
 // Colors attributed to players
   'player_colors' => [
@@ -143,11 +143,9 @@ $gameinfos = [
 // Short game presentation text that will appear on the game description page, structured as an array of paragraphs.
 // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
 // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
-'presentation' => array(
-//    totranslate("This wonderful game is about geometric shapes!"),
-//    totranslate("It was awarded best triangle game of the year in 2005 and nominated for the Spiel des Jahres."),
-//    ...
-),
+'presentation' => [
+    totranslate("In Mind Up!, you start with a line of cards on the table, with as many cards as players. Each turn, players pick a card from their hand and simultaneously reveal it to make a new line, ordered from the lowest to the highest card. Each player then takes the card in the previous line at the same position as the one they just played, adding it to their tableau. These cards will score points at the end of the round, depending on their color and the order they were picked. After being scored, they become the player's hand for the next round."),
+],
 
 //////// BGA SANDBOX ONLY PARAMETERS (DO NOT MODIFY)
 
