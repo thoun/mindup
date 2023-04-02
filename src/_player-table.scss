@@ -1,5 +1,4 @@
 .player-table {
-  font-family: 'p22_undergroundheavy';
   width: 100%;
   position: relative;
   background: #FFFFFF33;
@@ -53,5 +52,20 @@
 
   .cards {
     min-height: 152px;
+  }
+
+  .score.cards {
+    display: flex;
+    justify-content: center;
+
+    .cards {
+      margin-top: -110px;
+
+      .card {
+        &:not(:first-child) {
+            margin-top: calc(-1 * var(--card-overlap));
+        }
+      }
+    }
   }
 }

@@ -39,45 +39,19 @@
       }
   	} 
 
-    public function playCardFromHand() {
+    public function chooseCard() {
         self::setAjaxMode();     
 
         $id = self::getArg("id", AT_posint, true);
-        $this->game->playCardFromHand($id);
+        $this->game->chooseCard($id);
 
         self::ajaxResponse();
     }
 
-    public function chooseMarketCardLine() {
+    public function cancelChooseCard() {
         self::setAjaxMode();     
 
-        $id = self::getArg("id", AT_posint, true);
-        $this->game->chooseMarketCardLine($id);
-
-        self::ajaxResponse();
-    }
-
-    public function chooseMarketCardHand() {
-        self::setAjaxMode();     
-
-        $id = self::getArg("id", AT_posint, true);
-        $this->game->chooseMarketCardHand($id);
-
-        self::ajaxResponse();
-    }
-
-    public function closeLine() {
-        self::setAjaxMode();     
-
-        $this->game->closeLine();
-
-        self::ajaxResponse();
-    }
-
-    public function pass() {
-        self::setAjaxMode();     
-
-        $this->game->pass();
+        $this->game->cancelChooseCard();
 
         self::ajaxResponse();
     }

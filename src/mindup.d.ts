@@ -13,7 +13,9 @@ interface Card {
 
 interface MindUpPlayer extends Player {
     playerNo: number;
+    scoresCards: Card[][];
     hand?: Card[];
+    selectedCard?: number;
 }
 
 interface MindUpGamedatas {
@@ -29,8 +31,8 @@ interface MindUpGamedatas {
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
-    firstPlayerId: number;
     table: Card[];
+    costs: number[];
 }
 
 interface MindUpGame extends Game {
@@ -41,8 +43,6 @@ interface MindUpGame extends Game {
 
     setTooltip(id: string, html: string): void;
     onHandCardClick(card: Card): void;
-    onLineCardClick(card: Card): void;
-    onMarketCardClick(card: Card): void;
 }
 
 interface EnteringChooseMarketCardArgs {
@@ -63,42 +63,23 @@ interface EnteringPlayHandCardArgs {
     canPlaceOnLine: Card[];
 }
 
-// newMarket
-interface NotifNewMarketArgs {
-    cards: Card[];
-    deck: number;
+// newRound
+interface NotifNewRoundArgs {
+    costs: number[];
 }
 
-// chooseMarketCardHand
-interface NotifChooseMarketCardHandArgs {
+// selectedCard
+interface NotifSelectedCardArgs {
     playerId: number;
-    card: Card;
-}
-
-// jackpotRemaining, discardRemaining
-interface NotifJackpotRemainingArgs {
-    color: number;
-    card: Card;
-}
-// newFirstPlayer
-interface NotifNewFirstPlayerArgs {
-    playerId: number;
-}  
-
-// playCard
-interface NotifPlayCardArgs {
-    playerId: number;
-    card: Card;
-    fromHand: boolean;
+    selected: boolean;
 } 
 
-// applyJackpot
-interface NotifApplyJackpotArgs {
+// placeCardUnder
+interface NotifPlayerCardArgs {
+    card: Card;
     playerId: number;
-    color: number;
-    count: number | string;
 }
-
+/*
 // betResult
 interface NotifBetResultArgs {
     playerId: number;
@@ -112,4 +93,4 @@ interface NotifApplyJackpotArgs {
     removed: number | string;
     color: number;
     lineColorCard: Card[];
-}
+}*/

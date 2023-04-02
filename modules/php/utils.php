@@ -80,17 +80,13 @@ trait UtilTrait {
         return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
-    function getFirstPlayer() {
-        return intval($this->getGameStateValue(FIRST_PLAYER));
+    function getPlayerSelectedCard(int $playerId) {
+        $val = $this->getUniqueValueFromDB("SELECT player_selected_card FROM player where `player_id` = $playerId");
+        return $val != null ? intval($val) : null;
     }
 
-    function setFirstPlayer(int $playerId) {
-        $this->setGameStateValue(FIRST_PLAYER, $playerId);
-
-        self::notifyAllPlayers('newFirstPlayer', '', [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-        ]);
+    function setPlayerSelectedCard(int $playerId, /*int|null*/ $selectedCard) {
+        self::DbQuery("update player set player_selected_card = ".($selectedCard !== null ? $selectedCard : 'NULL')." where `player_id` = $playerId");
     }
 
     function getCardById(int $id) {
@@ -137,179 +133,23 @@ trait UtilTrait {
         }
     }
 
-    // return list of cards that can be placed on the player's line
-    function canPlaceOnLine(int $playerId, array $market = []) {
-        $hand = $this->getPlayer($playerId)->playedHand ? [] : $this->getCardsByLocation('hand', $playerId);
+    function getCol(int $playerId, int $color) {
+        $cards = $this->getCardsByLocation('score'.$playerId);
 
-        $cards = array_merge($hand, $market);
-        $line = $this->getCardsByLocation('line'.$playerId);
-        $hasBetCard = count(array_filter($line, fn($card) => $card->type == 2)) > 0;
-        $lineWithoutBet = array_values(array_filter($line, fn($card) => $card->type == 1));
-
-        if ($hasBetCard) {
-            $cards = array_values(array_filter($cards, fn($card) => $card->type != 2));
-        }
-
-        if (count($lineWithoutBet) < 2) {
-            return $cards;
-        }
-
-        $direction = $lineWithoutBet[1]->number - $lineWithoutBet[0]->number;
-
-        $lineLastNumber = $lineWithoutBet[count($lineWithoutBet) - 1]->number;
-
-        if ($direction > 0) {
-            return array_values(array_filter($cards, fn($card) => $card->type != 1 || $card->number > $lineLastNumber));
+        $card = $this->array_find($cards, fn($c) => $c->color == $color);
+        if ($card != null) {
+            return $card->locationArg;
         } else {
-            return array_values(array_filter($cards, fn($card) => $card->type != 1 ||$card->number < $lineLastNumber));
+            $maxLocationArg = -1;
+
+            foreach($cards as $c) {
+                if ($c->locationArg > $maxLocationArg) {
+                    $maxLocationArg = $c->locationArg;
+                }
+            }
+
+            return $maxLocationArg + 1;
         }
-    }
-
-    function getPlayer(int $id) {
-        $sql = "SELECT * FROM player WHERE player_id = $id";
-        $dbResults = $this->getCollectionFromDb($sql);
-        return array_map(fn($dbResult) => new MindUpPlayer($dbResult), array_values($dbResults))[0];
-    }
-   
-    function getPlayers() {
-        $sql = "SELECT * FROM player ORDER BY player_no";
-        $dbResults = $this->getCollectionFromDb($sql);
-        return array_map(fn($dbResult) => new MindUpPlayer($dbResult), array_values($dbResults));
-    }
-
-    function playCard(int $playerId, int $id, $fromMarket = false) {
-        $args = $this->argChooseMarketCard();
-        $card = $this->array_find($args['canPlaceOnLine'], fn($c) => $c->id == $id);
-        if (($card == null)  ||
-            (!$fromMarket && ($card->location != 'hand' || $card->locationArg != $playerId)) ||
-            ($fromMarket && $card->location != 'market')) {
-            throw new BgaUserException("You can't play this card");
-        }
-
-        $this->cards->moveCard($id, 'line'.$playerId, intval($this->cards->countCardInLocation('line'.$playerId)));
-
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} adds card ${cardValue} to line'), [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-            'card' => $card,
-            'cardValue' => '',
-            'preserve' => ['card', 'cardValue'],
-            'fromHand' => $card->location == 'hand',
-        ]);
-
-        if ($card->type == 1) {
-            $this->checkJackpot($playerId, $card->color);
-        } else if ($card->type == 2) {
-            $this->incStat(1, 'betCardsPlayed');   
-            $this->incStat(1, 'betCardsPlayed', $playerId);   
-        }
-    }
-
-    function checkJackpot(int $playerId, int $color) {        
-        $line = $this->getCardsByLocation('line'.$playerId);
-        $lineColorCards = array_values(array_filter($line, fn($card) => $card->type == 1 && $card->color == $color));
-        if (count($lineColorCards) == 3) {
-            $this->applyJackpot($playerId, $color, $lineColorCards);
-        }
-    }
-
-    function applyJackpot(int $playerId, int $color, array $lineColorCards) {
-        $jackpotCardsCount = intval($this->cards->countCardInLocation('jackpot', $color));
-        if ($jackpotCardsCount > 0) {
-            $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);            
-            self::DbQuery("update player set player_score = player_score + $jackpotCardsCount where `player_id` = $playerId");
-        }
-        self::notifyAllPlayers($jackpotCardsCount > 0 ? 'applyJackpot' : 0, clienttranslate('${player_name} adds ${count} card(s) from the ${colorName} jackpot pile to scored cards'), [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-            'count' => $jackpotCardsCount,
-            'color' => $color,
-            'colorName' => $this->getColorName($color),
-            'lineColorCard' => $lineColorCards,
-        ]);
-        $this->incStat(1, 'jackpotCollected');   
-        $this->incStat(1, 'jackpotCollected', $playerId); 
-
-        $this->incStat($jackpotCardsCount, 'pointsFromJackpots');   
-        $this->incStat($jackpotCardsCount, 'pointsFromJackpots', $playerId);   
-    }
-
-    function applyCloseLine(int $playerId) {
-        self::notifyAllPlayers('log', clienttranslate('${player_name} closes his line'), [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-        ]);
-
-        $line = $this->getCardsByLocation('line'.$playerId);
-        $lineWithoutBet = array_values(array_filter($line, fn($card) => $card->type == 1));
-        $betCard = $this->array_find($line, fn($card) => $card->type == 2);
-
-        if ($betCard != null)  {
-            $cardsAfterBetCard = array_values(array_filter($lineWithoutBet, fn($card) => $card->locationArg > $betCard->locationArg));
-            $betWon = count($cardsAfterBetCard) >= $betCard->number;
-            $tokenNumber = $betWon ? $betCard->number : -$betCard->number;
-
-            $tokens = $this->getPlayer($playerId)->tokens;
-            $tokens[$tokenNumber]++;
-            $this->DbQuery("UPDATE player SET `player_tokens` = '".json_encode($tokens)."', player_score = player_score + $tokenNumber WHERE player_id = $playerId");
-
-            self::notifyAllPlayers('betResult', $betWon ? clienttranslate('${player_name} won the ${cardValue} bet') : clienttranslate('${player_name} lost the ${cardValue} bet'), [
-                'playerId' => $playerId,
-                'player_name' => $this->getPlayerName($playerId),
-                'value' => $tokenNumber,
-                'card' => $betCard,
-                'cardValue' => '',
-                'preserve' => ['card', 'cardValue'],
-            ]);
-
-            $statName = $betWon ? 'betWon' : 'betLost' ;
-            $this->incStat(1, $statName);   
-            $this->incStat(1, $statName, $playerId);  
-            $this->incStat($tokenNumber, 'pointsFromBet');   
-            $this->incStat($tokenNumber, 'pointsFromBet', $playerId);  
-
-            $this->cards->moveCard($betCard->id, 'discard');
-        }
-
-        $discardedCards = array_slice($lineWithoutBet, 0, 3);
-        $scoredCards = array_slice($lineWithoutBet, 3);
-
-        if (count($discardedCards) > 0) {
-            $this->cards->moveCards(array_map(fn($card) => $card->id, $discardedCards), 'discard');
-        }
-
-        if (count($scoredCards) > 0) {
-            $this->cards->moveCards(array_map(fn($card) => $card->id, $scoredCards), 'scored', $playerId);
-            self::DbQuery("update player set player_score = player_score + ".count($scoredCards)." where `player_id` = $playerId");
-        }
-
-        self::notifyAllPlayers('closeLine', clienttranslate('${player_name} adds ${count} card(s) from the line to scored cards (${removed} removed cards)'), [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-            'count' => count($scoredCards),
-            'removed' => count($discardedCards),
-        ]);
-
-        $this->incStat(count($scoredCards), 'pointsFromLines');   
-        $this->incStat(count($scoredCards), 'pointsFromLines', $playerId); 
-        if (count($lineWithoutBet) >= 2) {
-            $statName = $lineWithoutBet[1]->number > $lineWithoutBet[0]->number ? 'increasingLines' : 'decreasingLines';
-            $this->incStat(1, $statName);   
-            $this->incStat(1, $statName, $playerId);   
-        }
-        
-        $this->incStat(1, 'closedLines');   
-        $this->incStat(1, 'closedLines', $playerId);   
-    }
-
-    function getColorName(int $color) {
-        switch ($color) {
-            case 1: return clienttranslate('Red');
-            case 2: return clienttranslate('Blue');
-            case 3: return clienttranslate('Green');
-            case 4: return clienttranslate('Yellow');
-        }
-        return null;
     }
     
 }

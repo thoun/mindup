@@ -72,59 +72,19 @@ $basicGameStates = [
 
 $playerActionsGameStates = [
 
-    ST_PLAYER_CHOOSE_MARKET_CARD => [
-        "name" => "chooseMarketCard",
-        "description" => clienttranslate('${actplayer} must choose a market card'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a market card'),
-        "descriptionForced" => clienttranslate('${actplayer} must close the line to be able to play'),
-        "descriptionmyturnForced" => clienttranslate('${you} must close the line to be able to play'),
-        "type" => "activeplayer",
-        "args" => "argChooseMarketCard",
+    ST_MULTIPLAYER_CHOOSE_CARD => [
+        "name" => "chooseCard",
+        "description" => clienttranslate('Waiting for other players'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a card'),
+        "type" => "multipleactiveplayer",
+        "action" => "stChooseCard",
+        "args" => "argChooseCard",
         "possibleactions" => [ 
-            "playCardFromHand",
-            "closeLine",
-            "chooseMarketCardLine",
-            "chooseMarketCardHand",
+            "chooseCard",
+            "cancelChooseCard",
         ],
         "transitions" => [
-            "next" => ST_PLAYER_PLAY_CARD,
-            "stay" => ST_PLAYER_CHOOSE_MARKET_CARD,
-        ]
-    ],
-
-    ST_PLAYER_PLAY_CARD => [
-        "name" => "playCard",
-        "description" => clienttranslate('${actplayer} can play a card or close the line'),
-        "descriptionmyturn" => clienttranslate('${you} can play a card or close the line'),
-        "descriptionOnlyClose" => clienttranslate('${actplayer} can close the line'),
-        "descriptionmyturnOnlyClose" => clienttranslate('${you} can close the line'),
-        "type" => "activeplayer",    
-        "args" => "argPlayCard",
-        "action" => "stPlayCard",
-        "possibleactions" => [ 
-            "playCardFromHand",
-            "closeLine",
-            "pass",
-        ],
-        "transitions" => [
-            "next" => ST_NEXT_PLAYER,
-            "stay" => ST_PLAYER_PLAY_CARD,
-        ],
-    ],
-
-    ST_PLAYER_END_PLAY_HAND_CARD => [
-        "name" => "playHandCard",
-        "description" => clienttranslate('${actplayer} can play a card (end game)'),
-        "descriptionmyturn" => clienttranslate('${you} can play a card (end game)'),
-        "type" => "activeplayer",    
-        "args" => "argPlayHandCard",
-        "action" => "stPlayHandCard",
-        "possibleactions" => [ 
-            "playCardFromHand",
-            "pass",
-        ],
-        "transitions" => [
-            "next" => ST_END_NEXT_PLAYER,
+            "end" => ST_REVEAL_CARDS,
         ],
     ],
 ];
@@ -138,17 +98,17 @@ $gameGameStates = [
         "action" => "stNewRound",
         "updateGameProgression" => true,
         "transitions" => [
-            "next" => ST_PLAYER_CHOOSE_MARKET_CARD,
+            "next" => ST_MULTIPLAYER_CHOOSE_CARD,
         ],
     ],
 
-    ST_NEXT_PLAYER => [
-        "name" => "nextPlayer",
-        "description" => "",
+    ST_REVEAL_CARDS => [
+        "name" => "revealCards",
+        "description" => clienttranslate('Revealing and placing chosen cards...'),
         "type" => "game",
-        "action" => "stNextPlayer",
+        "action" => "stRevealCards",
         "transitions" => [
-            "nextPlayer" => ST_PLAYER_CHOOSE_MARKET_CARD,
+            "next" => ST_MULTIPLAYER_CHOOSE_CARD,
             "endRound" => ST_END_ROUND,
         ],
     ],
@@ -161,29 +121,6 @@ $gameGameStates = [
         "updateGameProgression" => true,
         "transitions" => [
             "newRound" => ST_NEW_ROUND,
-            "endDeck" => ST_END_DECK,
-        ],
-    ],
-
-    ST_END_DECK => [
-        "name" => "endDeck",
-        "description" => "",
-        "type" => "game",
-        "action" => "stEndDeck",
-        "updateGameProgression" => true,
-        "transitions" => [
-            "next" => ST_PLAYER_END_PLAY_HAND_CARD,
-            "endScore" => ST_END_SCORE,
-        ],
-    ],
-
-    ST_END_NEXT_PLAYER => [
-        "name" => "endNextPlayer",
-        "description" => "",
-        "type" => "game",
-        "action" => "stEndNextPlayer",
-        "transitions" => [
-            "nextPlayer" => ST_PLAYER_END_PLAY_HAND_CARD,
             "endScore" => ST_END_SCORE,
         ],
     ],

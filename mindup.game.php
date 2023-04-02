@@ -45,7 +45,6 @@ class MindUp extends Table {
         parent::__construct();
         
         self::initGameStateLabels([
-            FIRST_PLAYER => FIRST_PLAYER,
         ]);   
 		
         $this->cards = $this->getNew("module.common.deck");
@@ -76,11 +75,7 @@ class MindUp extends Table {
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
         $values = [];
-        $firstPlayer = null;
         foreach( $players as $player_id => $player ) {
-            if ($firstPlayer === null) {
-                $firstPlayer = $player_id;
-            }
             $color = array_shift( $default_colors );
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
         }
@@ -92,7 +87,6 @@ class MindUp extends Table {
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        $this->setGameStateInitialValue(FIRST_PLAYER, $firstPlayer);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -149,12 +143,18 @@ class MindUp extends Table {
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);
 
+            $player['scoresCards'] = [];
+            for ($i=0; $i<5; $i++) {
+                $player['scoresCards'][$i] = $this->getCardsByLocation('score'.$playerId, $i);
+            }
+
             if ($currentPlayerId == $playerId) {
                 $player['hand'] = $this->getCardsByLocation('hand', $playerId);
+                $player['selectedCard'] = $this->getPlayerSelectedCard($playerId);
             }
         }
 
-        $result['firstPlayerId'] = $this->getGameStateValue(FIRST_PLAYER);
+        $result['costs'] = $this->getGlobalVariable(COSTS, true);
         $result['table'] = $this->getCardsByLocation('table');
   
         return $result;
@@ -171,6 +171,7 @@ class MindUp extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
+        $round = intval($this->getStat('roundNumber')); // 0 based
         return intval($this->cards->countCardInLocation('deck'));
     }
 
@@ -206,8 +207,19 @@ class MindUp extends Table {
         }
 
         if ($state['type'] === "multipleactiveplayer") {
+            $playerId = intval($active_player);
+            // randomly play a card
+            $playerHand = $this->getCardsByLocation('hand', $playerId);
+            $id = $playerHand[bga_rand(0, count($playerHand) - 1)]->id;
+
+            $this->setPlayerSelectedCard($playerId, $id);
+            $this->notifyAllPlayers('selectedCard', '', [
+                'playerId' => $playerId,
+                'selected' => true,
+            ]);
+
             // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
+            $this->gamestate->setPlayerNonMultiactive( $active_player, 'next');
             
             return;
         }

@@ -35,20 +35,6 @@
   vertical-align: middle;
 }
 
-.first-player-token-wrapper {
-  position: relative;
-}
-
-.first-player-token {
-  background-image: url('img/first-player.png');
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  box-shadow: 1px 1px 3px 1px black;
-}
-
 .bet-tokens {
   display: flex;
   flex-wrap: wrap;

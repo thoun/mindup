@@ -50,9 +50,7 @@ class MindUp implements MindUpGame {
         this.cardsManager = new CardsManager(this);
         this.animationManager = new AnimationManager(this);
         this.tableCenter = new TableCenter(this, gamedatas);
-        this.createPlayerPanels(gamedatas);
         this.createPlayerTables(gamedatas);
-
         
         this.zoomManager = new ZoomManager({
             element: document.getElementById('table'),
@@ -79,41 +77,9 @@ class MindUp implements MindUpGame {
         log('Entering state: ' + stateName, args.args);
 
         switch (stateName) {
-            case 'chooseMarketCard':
-                this.onEnteringChooseMarketCard(args.args);
+            case 'chooseCard':
+                this.getCurrentPlayerTable()?.setSelectable(true);
                 break;
-            case 'playCard':
-            case 'playHandCard':
-                this.onEnteringPlayCard(args.args);
-                break;
-        }
-    }
-    
-    private setGamestateDescription(property: string = '') {
-        const originalState = this.gamedatas.gamestates[this.gamedatas.gamestate.id];
-        this.gamedatas.gamestate.description = `${originalState['description' + property]}`; 
-        this.gamedatas.gamestate.descriptionmyturn = `${originalState['descriptionmyturn' + property]}`;
-        (this as any).updatePageTitle();
-    }
-    
-    private onEnteringChooseMarketCard(args: EnteringChooseMarketCardArgs) {
-        if (args.mustClose) {
-            this.setGamestateDescription(`Forced`);
-        }
-        if ((this as any).isCurrentPlayerActive()) {
-            this.selectedCardId = null;
-            this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
-            this.getCurrentPlayerTable()?.setSelectable(true, args.canPlaceOnLine);
-        }
-    }
-    
-    private onEnteringPlayCard(args: EnteringPlayCardArgs) {
-        if (args.onlyClose) {
-            this.setGamestateDescription(`OnlyClose`);
-        }
-        
-        if ((this as any).isCurrentPlayerActive()) {
-            this.getCurrentPlayerTable()?.setSelectable(true, args.canPlaceOnLine);
         }
     }
 
@@ -121,14 +87,7 @@ class MindUp implements MindUpGame {
         log( 'Leaving state: '+stateName );
 
         switch (stateName) {
-           case 'chooseMarketCard':
-                this.selectedCardId = null;
-                this.tableCenter.setSelectable(false);
-                this.getCurrentPlayerTable()?.setSelectable(false);
-                this.getCurrentPlayerTable()?.addCardsPlaceholders(false, false);
-                break;
-            case 'playCard':
-            case 'playHandCard':
+           case 'chooseCard':
                 this.getCurrentPlayerTable()?.setSelectable(false);
                 break;
         }
@@ -138,31 +97,9 @@ class MindUp implements MindUpGame {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
-        if ((this as any).isCurrentPlayerActive()) {
-            switch (stateName) {
-                case 'chooseMarketCard':
-                    this.selectedCardId = null;
-                    const chooseMarketCardArgs = args as EnteringChooseMarketCardArgs;
-                    if (!chooseMarketCardArgs.mustClose) {
-                        (this as any).addActionButton(`addLine_button`, `<div class="player-line-card"></div> ` + _("Add selected card to line"), () => this.chooseMarketCardLine());
-                        (this as any).addActionButton(`addHand_button`, `<div class="player-hand-card"></div> ` + _("Add selected card to hand"), () => this.chooseMarketCardHand());
-                        [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
-                    }
-
-                    if (chooseMarketCardArgs.canClose) {
-                        (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
-                    }
-                    break;
-                case 'playCard':
-                    const playCardArgs = args as EnteringPlayCardArgs;
-                    (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
-                    if (playCardArgs.canClose) {
-                        (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
-                    }
-                    break;
-                case 'playHandCard':
-                    (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
-                    break;
+        if (stateName === 'chooseCard') {
+            if (!(this as any).isCurrentPlayerActive() && Object.keys(this.gamedatas.players).includes(''+this.getPlayerId())) { // ignore spectators
+                (this as any).addActionButton(`cancelChooseSecretMissions-button`, _("I changed my mind"), () => this.cancelChooseCard(), null, null, 'gray');
             }
         }
     }
@@ -229,48 +166,6 @@ class MindUp implements MindUpGame {
         return orderedPlayers;
     }
 
-    private createPlayerPanels(gamedatas: MindUpGamedatas) {
-
-        Object.values(gamedatas.players).forEach(player => {
-            const playerId = Number(player.id);   
-
-            // hand + scored cards counter
-            dojo.place(`<div class="counters">
-                <div id="playerhand-counter-wrapper-${player.id}" class="playerhand-counter">
-                    <div class="player-hand-card"></div> 
-                    <span id="playerhand-counter-${player.id}"></span> / 2
-                </div>
-                <div id="scored-counter-wrapper-${player.id}" class="scored-counter">
-                    <div class="player-scored-card"></div> 
-                    <span id="scored-counter-${player.id}"></span>
-                </div>
-            </div>`, `player_board_${player.id}`);
-
-            /*const handCounter = new ebg.counter();
-            handCounter.create(`playerhand-counter-${playerId}`);
-            handCounter.setValue(player.hand.length);
-            this.handCounters[playerId] = handCounter;*/
-
-            /*const scoredCounter = new ebg.counter();
-            scoredCounter.create(`scored-counter-${playerId}`);
-            scoredCounter.setValue(player.scored);
-            this.scoredCounters[playerId] = scoredCounter;*/
-
-            // first player
-            dojo.place(`
-            <div id="bet-tokens-${player.id}" class="bet-tokens"></div>
-            <div id="first-player-token-wrapper-${player.id}" class="first-player-token-wrapper"></div>
-            `, `player_board_${player.id}`);
-
-            if (gamedatas.firstPlayerId == playerId) {
-                dojo.place(`<div id="first-player-token" class="first-player-token"></div>`, `first-player-token-wrapper-${player.id}`);
-            }
-        });
-
-        this.setTooltipToClass('playerhand-counter', _('Number of cards in hand'));
-        this.setTooltipToClass('scored-counter', _('Number of cards in the score pile'));
-    }
-
     private createPlayerTables(gamedatas: MindUpGamedatas) {
         const orderedPlayers = this.getOrderedPlayers(gamedatas);
 
@@ -280,14 +175,8 @@ class MindUp implements MindUpGame {
     }
 
     private createPlayerTable(gamedatas: MindUpGamedatas, playerId: number) {
-        const table = new PlayerTable(this, gamedatas.players[playerId]);
+        const table = new PlayerTable(this, gamedatas.players[playerId], gamedatas.costs);
         this.playersTables.push(table);
-    }
-
-    private addBetToken(playerId: number, value: number) {
-        document.getElementById(`bet-tokens-${playerId}`).insertAdjacentHTML('beforeend', `
-            <div class="bet-token" data-value="${value}" style="order: ${value}"></div>
-        `);
     }
 
     private incScore(playerId: number, inc: number) {
@@ -298,91 +187,27 @@ class MindUp implements MindUpGame {
         this.scoredCounters[playerId].incValue(inc);
         this.incScore(playerId, inc);
     }
-    
-
-    public onMarketCardClick(card: Card): void {
-        const args: EnteringChooseMarketCardArgs = this.gamedatas.gamestate.args;
-        if (!args.canAddToHand && !args.canPlaceOnLine.some(s => s.id == card.id)) {
-            return;
-        }
-
-        this.selectedCardId = card.id;
-        const canPlaceCardOnLine = args.canAddToLine && args.canPlaceOnLine.some(s => s.id == card.id);
-        const canPlaceCardOnHand = args.canAddToHand;
-        document.getElementById(`addLine_button`).classList.toggle('disabled', !canPlaceCardOnLine);
-        document.getElementById(`addHand_button`).classList.toggle('disabled', !canPlaceCardOnHand);
-
-        this.getCurrentPlayerTable()?.addCardsPlaceholders(canPlaceCardOnLine, canPlaceCardOnHand);
-    }
 
     public onHandCardClick(card: Card): void {
-        if (card.id < 0) {
-            this.chooseMarketCardHand();
-        } else {
-            this.playCardFromHand(card.id);
-        }
-    }
-
-    public onLineCardClick(card: Card): void {
-        if (card.id < 0) {
-            this.chooseMarketCardLine();
-        }
+        this.chooseCard(card.id);
     }
   	
-    public playCardFromHand(id: number) {
-        if(!(this as any).checkAction('playCardFromHand')) {
+    public chooseCard(id: number) {
+        /*if(!(this as any).checkAction('chooseCard')) {
             return;
-        }
+        }*/
 
-        this.takeAction('playCardFromHand', {
+        this.takeAction('chooseCard', {
             id
         });
     }
   	
-    public chooseMarketCardLine() {
-        if(!(this as any).checkAction('chooseMarketCardLine')) {
+    public cancelChooseCard() {
+        /*if(!(this as any).checkAction('cancelChooseCard')) {
             return;
-        }
-        this.getCurrentPlayerTable()?.addCardsPlaceholders(false, false);
+        }*/
 
-        this.takeAction('chooseMarketCardLine', {
-            id: this.selectedCardId,
-        });
-    }
-  	
-    public chooseMarketCardHand() {
-        if(!(this as any).checkAction('chooseMarketCardHand')) {
-            return;
-        }
-        this.getCurrentPlayerTable()?.addCardsPlaceholders(false, false);
-
-        this.takeAction('chooseMarketCardHand', {
-            id: this.selectedCardId,
-        });
-    }
-  	
-    public closeLine(confirmed: boolean = false) {
-        if (!confirmed && !this.gamedatas.gamestate.args.mustClose) {
-            (this as any).confirmationDialog(
-                _("Are you sure you want to close this line ?"), 
-                () => this.closeLine(true)
-            );
-            return;
-        }
-
-        if(!(this as any).checkAction('closeLine')) {
-            return;
-        }
-
-        this.takeAction('closeLine');
-    }
-  	
-    public pass() {
-        if(!(this as any).checkAction('pass')) {
-            return;
-        }
-
-        this.takeAction('pass');
+        this.takeAction('cancelChooseCard');
     }
 
     public takeAction(action: string, data?: any) {
@@ -407,15 +232,11 @@ class MindUp implements MindUpGame {
         //log( 'notifications subscriptions setup' );
 
         const notifs = [
-            ['newMarket', ANIMATION_MS],
-            ['chooseMarketCardHand', ANIMATION_MS],
-            ['jackpotRemaining', 100],
-            ['discardRemaining', 100],
-            ['newFirstPlayer', ANIMATION_MS],
-            ['playCard', ANIMATION_MS],
-            ['applyJackpot', ANIMATION_MS * 4],
-            ['betResult', ANIMATION_MS],
-            ['closeLine', ANIMATION_MS],
+            ['newRound', 1],
+            ['selectedCard', 1],
+            ['placeCardUnder', ANIMATION_MS],
+            ['scoreCard', ANIMATION_MS],
+            ['moveTableLine', ANIMATION_MS],
         ];
     
         notifs.forEach((notif) => {
@@ -424,49 +245,27 @@ class MindUp implements MindUpGame {
         });
     }
 
-    notif_newMarket(notif: Notif<NotifNewMarketArgs>) {
-        this.tableCenter.newMarket(notif.args.cards);
-        this.tableCenter.setDeck(notif.args.deck);
+    notif_newRound(notif: Notif<NotifNewRoundArgs>) {
+        this.playersTables.forEach(table => table.setCosts(notif.args.costs));
     }
 
-    notif_chooseMarketCardHand(notif: Notif<NotifChooseMarketCardHandArgs>) {
-        if (notif.args.playerId == this.getPlayerId()) {
-            this.getPlayerTable(notif.args.playerId).hand.addCard(notif.args.card);
-        } else {
-            this.tableCenter.market.removeCard(notif.args.card);
-        }
-        this.handCounters[notif.args.playerId].incValue(1);
+    notif_selectedCard(notif: Notif<NotifSelectedCardArgs>) {
+        console.log(notif.args);
     }
 
-    notif_jackpotRemaining(notif: Notif<NotifJackpotRemainingArgs>) {
-        this.tableCenter.addJackpotCard(notif.args.card);
+    notif_placeCardUnder(notif: Notif<NotifPlayerCardArgs>) {
+        this.tableCenter.placeCardUnder(notif.args.card, notif.args.playerId);
     }
 
-    notif_discardRemaining(notif: Notif<NotifJackpotRemainingArgs>) {
-        this.tableCenter.market.removeCard(notif.args.card);
+    notif_scoreCard(notif: Notif<NotifPlayerCardArgs>) {
+        this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
     }
 
-    notif_newFirstPlayer(notif: Notif<NotifNewFirstPlayerArgs>) {
-        const firstPlayerToken = document.getElementById('first-player-token');
-        const destinationId = `first-player-token-wrapper-${notif.args.playerId}`;
-        const originId = firstPlayerToken.parentElement.id;
-        if (destinationId !== originId) {
-            this.animationManager.attachWithSlideAnimation(
-                firstPlayerToken,
-                document.getElementById(destinationId),
-                { zoom: 1 },
-            );
-        }
+    notif_moveTableLine() {
+        this.tableCenter.moveTableLine();
     }
 
-    notif_playCard(notif: Notif<NotifPlayCardArgs>) {
-        this.getPlayerTable(notif.args.playerId).line.addCard(notif.args.card);
-        if (notif.args.fromHand) {
-            this.handCounters[notif.args.playerId].incValue(-1);
-        }
-    }
-
-    notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
+    /*notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
         this.incScored(notif.args.playerId, Number(notif.args.count));
         this.tableCenter.setJackpot(notif.args.color, 0);
         notif.args.lineColorCard.forEach(card => this.cardsManager.getCardElement(card).classList.add('jackpot-animation'));
@@ -480,7 +279,7 @@ class MindUp implements MindUpGame {
     notif_closeLine(notif: Notif<NotifApplyJackpotArgs>) {
         this.getPlayerTable(notif.args.playerId).line.removeAll();
         this.incScored(notif.args.playerId, Number(notif.args.count));
-    }
+    }*/
 
 
     /* This enable to inject translatable styled things to logs or action bar */

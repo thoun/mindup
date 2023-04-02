@@ -11,6 +11,7 @@ class Card {
     public int $number;
     public int $color;
     public int $points;
+    public /*int|null*/ $playerId;
 
     public function __construct($dbCard) {
         $CARD_COLORS = [

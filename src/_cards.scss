@@ -4,8 +4,7 @@
     width: 100px;
     height: 152px;
     margin: 5px;
-    border-radius: 10px;
-    font-family: 'p22_undergroundheavy';
+    border-radius: 8px;
 
     &.disabled {
       cursor: not-allowed;
@@ -14,7 +13,7 @@
 
     .card-sides {
         .card-side {
-            border-radius: 10px;
+            border-radius: 8px;
 
             &>* {
                 pointer-events: none;
@@ -22,7 +21,7 @@
             }
 
             &.front {  
-                background-size: auto 100%;              
+                background-size: auto 100%;
                 background-image: url('img/card-back.jpg');
             }
 
@@ -59,6 +58,17 @@
             }
         }
     }
+
+    &.score {        
+        background-size: auto 100%;              
+        background-image: url('img/scoring-cards.jpg');
+
+        @for $cost from 1 through 5 {
+            &[data-cost="#{$cost}"] {
+                background-position-x: #{($cost - 1) * 100% / 4};
+            }
+        }
+    }
 }
 
 @keyframes selectable-card-animation {
@@ -69,32 +79,5 @@
     100% { 
       //background: var(--background-darker);
       box-shadow: 0 0 5px 3px #FFFFFF;
-    }
-}
-
-.jackpot-animation {
-    
-  &[data-color="1"] {
-    --card-color: #ED1B24;
-  }
-  &[data-color="2"] {
-    --card-color: #009BDE;
-  }
-  &[data-color="3"] {
-    --card-color: #3AB54A;
-  }
-  &[data-color="4"] {
-    --card-color: #FFC30D;
-  }
-
-  animation: jackpot-animation 2s alternate 1 ease-in-out;
-}
-
-@keyframes jackpot-animation {
-    50% { 
-        box-shadow: 0 0 5px 10px var(--card-color);
-    }
-    100% {
-        box-shadow: unset;
     }
 }

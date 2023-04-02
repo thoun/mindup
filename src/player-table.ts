@@ -4,11 +4,11 @@ const log = isDebug ? console.log.bind(window.console) : function () { };
 class PlayerTable {
     public playerId: number;
     public hand?: LineStock<Card>;
-    public line: LineStock<Card>;
+    public scores: LineStock<Card>[] = [];
 
     private currentPlayer: boolean;
 
-    constructor(private game: MindUpGame, player: MindUpPlayer) {
+    constructor(private game: MindUpGame, player: MindUpPlayer, costs: number[]) {
         this.playerId = Number(player.id);
         this.currentPlayer = this.playerId == this.game.getPlayerId();
 
@@ -21,15 +21,14 @@ class PlayerTable {
             <div class="block-with-text hand-wrapper">
                 <div class="block-label">${_('Your hand')}</div>
                 <div id="player-table-${this.playerId}-hand" class="hand cards"></div>
-            </div>            
-            <div class="block-with-text">
-                <div class="block-label your-line">${_('Your line')}</div>`;
+            </div>`;
         }
-        html += `
-                <div id="player-table-${this.playerId}-line" class="line cards"></div>
-                `;
-        if (this.currentPlayer) {
+        html += `<div class="score cards">`;
+        for (let i=0; i<5; i++) {
             html += `
+            <div class="score-card-wrapper">
+                <div id="player-table-${this.playerId}-score${i}" class="score card"></div>
+                <div id="player-table-${this.playerId}-score${i}-cards" class="cards"></div>
             </div>`;
         }
         html += `
@@ -39,54 +38,41 @@ class PlayerTable {
         dojo.place(html, document.getElementById('tables'));
 
         if (this.currentPlayer) {
-            this.hand = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-hand`));
-            this.hand.onCardClick = (card: Card) => this.game.onHandCardClick(card);
+            const handDiv = document.getElementById(`player-table-${this.playerId}-hand`);
+            this.hand = new LineStock<Card>(this.game.cardsManager, handDiv);
+            this.hand.onCardClick = (card: Card) => {
+                if (handDiv.classList.contains('selectable')) {
+                    this.game.onHandCardClick(card);
+                    this.hand.getCards().forEach(c => this.hand.getCardElement(c).classList.toggle('selected', c.id == card.id));
+                }
+            }
             
             this.hand.addCards(player.hand);
         }
         
-        /*this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
-        if (this.currentPlayer) {
-            this.line.onCardClick = (card: Card) => this.game.onLineCardClick(card);
+        this.setCosts(costs);
+
+        for (let i=0; i<5; i++) {
+            const scoreDiv = document.getElementById(`player-table-${this.playerId}-score${i}-cards`);
+            this.scores[i] = new LineStock<Card>(this.game.cardsManager, scoreDiv, {
+                direction: 'column',
+            });
+            scoreDiv.style.setProperty('--card-overlap', '125px');
+            this.scores[i].addCards(player.scoresCards[i]);
         }
-        
-        this.line.addCards(player.line);*/
+    } 
+    
+    public setSelectable(selectable: boolean) {
+        document.getElementById(`player-table-${this.playerId}-hand`).classList.toggle('selectable', selectable);
     }
 
-    public setSelectable(selectable: boolean, selectableCards: Card[] | null = null) {
-        this.hand.setSelectionMode(selectable ? 'single' : 'none');
-        this.hand.getCards().forEach(card => {
-            const element = this.hand.getCardElement(card);
-            const disabled = selectable && selectableCards != null && !selectableCards.some(s => s.id == card.id);
-            element.classList.toggle('disabled', disabled);
-            element.classList.toggle('selectable', selectable && !disabled);
-        });
+    public setCosts(costs: number[]): void {
+        for (let i=0; i<5; i++) {
+            document.getElementById(`player-table-${this.playerId}-score${i}`).dataset.cost = ''+costs[i];
+        }
     }
     
-    public addCardsPlaceholders(canPlaceCardOnLine: boolean, canPlaceCardOnHand: boolean) {
-        const linePlaceholder = this.getPlaceholderCard('line');
-        if (canPlaceCardOnLine) {
-            this.line.addCard(linePlaceholder);
-            this.line.getCardElement(linePlaceholder).classList.add('selectable');
-        } else {
-            this.line.removeCard(linePlaceholder);
-        }
-
-        const handPlaceholder = this.getPlaceholderCard('hand');
-        if (canPlaceCardOnHand) {
-            this.hand.addCard(handPlaceholder);
-            this.hand.getCardElement(handPlaceholder).classList.add('selectable');
-        } else {
-            this.hand.removeCard(handPlaceholder);
-        }
-    }
-
-    private getPlaceholderCard(destination: 'hand' | 'line'): Card {
-        const id = destination == 'line' ? -1 : -2;
-        return {
-            id: id,
-            type: 0,
-            number: id,
-        } as Card;
+    public placeScoreCard(card: Card) {
+        this.scores[card.locationArg].addCard(card);
     }
 }

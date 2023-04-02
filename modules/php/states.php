@@ -12,41 +12,69 @@ trait StateTrait {
     */
 
     function stNewRound() {
-        self::DbQuery("update player set player_played_hand = 0");
 
-        // place new market cards
-        $this->cards->pickCardsForLocation($this->getRoundCardCount(), 'deck', 'market'); 
+        $affectedCosts = [];
+        $costs = [1, 2, 3, 4, 5];
 
-        if (intval($this->getStat('roundNumber')) > 0) { 
-            self::notifyAllPlayers('newMarket', clienttranslate('Market is refilled'), [
-                'cards' => $this->getCardsByLocation('market'),
-                'deck' => intval($this->cards->countCardInLocation('deck')),
-            ]);
+        for ($i = 0; $i < 5; $i++) {
+            $index = bga_rand(1, count($costs)) - 1;
+            $affectedCosts[] = $costs[$index];
+            array_splice($costs, $index, 1);
         }
+        $this->setGlobalVariable(COSTS, $affectedCosts);
+
+        self::notifyAllPlayers('newRound', '', [
+            'costs' => $affectedCosts,
+        ]);
 
         $this->gamestate->nextState('next');
     }
 
-    function stPlayCard() {
-        $args = $this->argPlayCard();
-        if (!$args['canClose'] && $args['onlyClose']) { // cannot do anything
-            $this->gamestate->nextState('next');
-        }
+    function stChooseCard() {
+        $this->gamestate->setAllPlayersMultiactive();
     }
 
-    function stNextPlayer() {
-        $playerId = intval($this->getActivePlayerId());
+    function stRevealCards() {
+        $dbResults = $this->getCollectionFromDb("SELECT `player_id`, `player_selected_card` FROM `player`");
+        $selectedCardsIds = array_map(fn($dbResult) => intval($dbResult['player_selected_card']), $dbResults);
 
-        $this->giveExtraTime($playerId);
-
-        $playerId = intval($this->activeNextPlayer());
-
-        $endRound = $playerId == $this->getFirstPlayer();
-        if ($endRound) {
-            $this->gamestate->nextState('endRound');
-        } else {
-            $this->gamestate->nextState('nextPlayer');
+        $tableUnder = [];
+        foreach($selectedCardsIds as $playerId => $id) {
+            $card = $this->getCardById($id);
+            $card->playerId = $playerId;
+            $tableUnder[] = $card;
         }
+
+        usort($tableUnder, fn($a, $b) => $a->number - $b->number);
+        foreach ($tableUnder as $index => $cardUnder) {
+            $this->cards->moveCard($cardUnder->id, 'tableUnder', $index);
+            $cardUnder->locationArg = $index;
+
+            self::notifyAllPlayers('placeCardUnder', '', [
+                'card' => json_decode(json_encode($cardUnder)),
+                'playerId' => $cardUnder->playerId,
+            ]);
+        }
+
+        $table = $this->getCardsByLocation('table');
+
+        foreach ($tableUnder as $index => $cardUnder) {
+            $cardOver = $table[$index];
+            $col = $this->getCol($cardUnder->playerId, $cardOver->color);
+            $this->cards->moveCard($cardOver->id, 'score'.$cardUnder->playerId, $col);
+            $cardOver->locationArg = $col;
+
+            self::notifyAllPlayers('scoreCard', '', [
+                'playerId' => $cardUnder->playerId,
+                'card' => json_decode(json_encode($cardOver)),
+            ]);
+        }
+
+        $this->cards->moveAllCardsInLocationKeepOrder('tableUnder', 'table');
+        self::notifyAllPlayers('moveTableLine', '', [
+        ]);
+
+        $this->gamestate->nextState('next');
     }
 
     function stEndRound() {
@@ -76,81 +104,8 @@ trait StateTrait {
         }
 
         $lastRound = intval($this->cards->countCardInLocation('deck')) < $this->getRoundCardCount();
-        if (!$lastRound) {            
-            $this->setFirstPlayer($this->activeNextPlayer());
-        }
 
         $this->gamestate->nextState($lastRound ? 'endDeck' : 'newRound');
-    }
-
-    function stEndDeck() {
-        self::DbQuery("update player set player_played_hand = 0");
-
-        // place remaining deck cards on jackpot
-        self::notifyAllPlayers('log', clienttranslate('Remaining cards in deck are placed on Jackpot tokens...'), []);
-        $cards = $this->getCardsByLocation('deck');
-        foreach($cards as $card) {
-            if ($card->type == 1) {
-                $this->cards->moveCard($card->id, 'jackpot', $card->color);
-            
-                self::notifyAllPlayers('jackpotRemaining', clienttranslate('Card ${cardValue} is added to the jackpot ${colorName}'), [
-                    'colorName' => $this->getColorName($card->color),
-                    'color' => $card->color,
-                    'card' => $card,
-                    'cardValue' => '',
-                    'preserve' => ['card', 'cardValue'],
-                ]);
-            } else if ($card->type == 2) {
-                $this->cards->moveCard($card->id, 'discard');
-            
-                self::notifyAllPlayers('discardRemaining', clienttranslate('Card ${cardValue} is discarded'), [
-                    'card' => $card,
-                    'cardValue' => '',
-                    'preserve' => ['card', 'cardValue'],
-                ]);
-            }
-        }
-
-        if (intval($this->cards->countCardInLocation('hand')) > 0) {
-            self::notifyAllPlayers('log', clienttranslate('Players with cards in hand can now play a card'), []);
-
-            $this->gamestate->nextState('next');
-        } else {
-            self::notifyAllPlayers('log', clienttranslate('All players hands are empty, next step is scoring'), []);
-
-            $this->gamestate->nextState('endScore');
-        }
-    }
-
-    function stPlayHandCard() {
-        $playerId = intval($this->getActivePlayerId());
-
-        $player = $this->getPlayer($playerId);
-        if ($player->playedHand || intval($this->cards->countCardInLocation('hand', $player->id)) == 0) {
-            $this->gamestate->nextState('next');
-        }
-    }
-
-    function stEndNextPlayer() {
-        $playerId = intval($this->getActivePlayerId());
-
-        $this->giveExtraTime($playerId);
-        
-        $endGame = true;
-        $players = $this->getPlayers();
-        foreach($players as $player) {
-            if (!$player->playedHand && intval($this->cards->countCardInLocation('hand', $player->id)) > 0) {
-                $endGame = false;
-                break;
-            }
-        }
-
-        if ($endGame) {
-            $this->gamestate->nextState('endScore');
-        } else {
-            $this->activeNextPlayer();
-            $this->gamestate->nextState('nextPlayer');
-        }
     }
 
     function stEndScore() {

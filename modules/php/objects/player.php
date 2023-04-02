@@ -6,8 +6,7 @@ class MindUpPlayer {
     public string $color;
     public int $no;
     public int $score;
-    public $tokens;
-    public bool $playedHand;
+    public /*int|null*/ $selectedCard;
 
     public function __construct($dbPlayer) {
         $this->id = intval($dbPlayer['player_id']);
@@ -15,8 +14,7 @@ class MindUpPlayer {
         $this->color = $dbPlayer['player_color'];
         $this->no = intval($dbPlayer['player_no']);
         $this->score = intval($dbPlayer['player_score']);
-        $this->tokens = json_decode($dbPlayer['player_tokens'], true);
-        $this->playedHand = boolval($dbPlayer['player_played_hand']);
+        $this->selectedCard = $dbPlayer['player_selected_card'] != null ? intval($dbPlayer['player_selected_card']) : null;
     }
 }
 ?>

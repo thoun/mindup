@@ -247,15 +247,14 @@ body > .card {
   width: 100px;
   height: 152px;
   margin: 5px;
-  border-radius: 10px;
-  font-family: "p22_undergroundheavy";
+  border-radius: 8px;
 }
 .card.disabled {
   cursor: not-allowed;
   filter: contrast(0.6);
 }
 .card .card-sides .card-side {
-  border-radius: 10px;
+  border-radius: 8px;
 }
 .card .card-sides .card-side > * {
   pointer-events: none;
@@ -464,6 +463,25 @@ body > .card {
 .card[data-number="60"] .front {
   background-position: 100% 100%;
 }
+.card.score {
+  background-size: auto 100%;
+  background-image: url("img/scoring-cards.jpg");
+}
+.card.score[data-cost="1"] {
+  background-position-x: 0%;
+}
+.card.score[data-cost="2"] {
+  background-position-x: 25%;
+}
+.card.score[data-cost="3"] {
+  background-position-x: 50%;
+}
+.card.score[data-cost="4"] {
+  background-position-x: 75%;
+}
+.card.score[data-cost="5"] {
+  background-position-x: 100%;
+}
 
 @keyframes selectable-card-animation {
   0% {
@@ -473,110 +491,23 @@ body > .card {
     box-shadow: 0 0 5px 3px #FFFFFF;
   }
 }
-.jackpot-animation {
-  animation: jackpot-animation 2s alternate 1 ease-in-out;
-}
-.jackpot-animation[data-color="1"] {
-  --card-color: #ED1B24;
-}
-.jackpot-animation[data-color="2"] {
-  --card-color: #009BDE;
-}
-.jackpot-animation[data-color="3"] {
-  --card-color: #3AB54A;
-}
-.jackpot-animation[data-color="4"] {
-  --card-color: #FFC30D;
-}
-
-@keyframes jackpot-animation {
-  50% {
-    box-shadow: 0 0 5px 10px var(--card-color);
-  }
-  100% {
-    box-shadow: unset;
-  }
-}
 #table-center {
-  font-family: "p22_undergroundheavy";
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: 2px solid #655291;
+  border: 2px solid #ffd752;
   padding: 5px;
   border-radius: 15px;
-  background: rgba(101, 82, 145, 0.4);
-  min-width: 600px;
+  background: rgba(255, 215, 82, 0.4);
   margin: 5px;
-  color: white;
-  font-size: 16pt;
 }
-#table-center #market-title {
-  margin-top: 20px;
-  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
-}
-
-#decks {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-#decks #deck {
-  margin-right: 20px;
-  background-size: auto 100%;
-  background-image: url("img/cards.jpg");
-  box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
-}
-
-.card-deck {
-  display: inline-block;
+#table-center .slot {
   position: relative;
   width: 100px;
   height: 152px;
-  margin: 5px;
-  border-radius: 10px;
-  font-family: "p22_undergroundheavy";
 }
-.card-deck[data-count="0"] {
-  box-shadow: unset;
-  opacity: 0.5;
+#table-center .slot .card {
+  margin: 0;
 }
-.card-deck .deck-counter {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
-  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black, 0 0 5px black, 0 0 6px black;
-  font-size: 24pt;
-}
-.card-deck .deck-counter .counter {
-  font-size: 30pt;
-}
-.card-deck .jackpot-token {
-  width: 100px;
-  height: 100px;
-  position: absolute;
-  margin-left: -50px;
-  top: 0;
-  left: 50%;
-  background-size: auto 100%;
-  background-image: url("img/jackpot-icons.png");
-}
-.card-deck .jackpot-token[data-color="1"] {
-  background-position-x: 0%;
-}
-.card-deck .jackpot-token[data-color="2"] {
-  background-position-x: 33.3333333333%;
-}
-.card-deck .jackpot-token[data-color="3"] {
-  background-position-x: 66.6666666667%;
-}
-.card-deck .jackpot-token[data-color="4"] {
-  background-position-x: 100%;
+#table-center .table-under {
+  margin-top: 8px;
 }
 
 .player-board {
@@ -607,20 +538,6 @@ body > .card {
   background-repeat: no-repeat;
   background-position: center;
   vertical-align: middle;
-}
-
-.first-player-token-wrapper {
-  position: relative;
-}
-
-.first-player-token {
-  background-image: url("img/first-player.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  box-shadow: 1px 1px 3px 1px black;
 }
 
 .bet-tokens {
@@ -659,7 +576,6 @@ body > .card {
 }
 
 .player-table {
-  font-family: "p22_undergroundheavy";
   width: 100%;
   position: relative;
   background: rgba(255, 255, 255, 0.2);
@@ -705,13 +621,17 @@ body > .card {
 .player-table .cards {
   min-height: 152px;
 }
-
-@font-face {
-  font-family: "p22_undergroundheavy";
-  src: url("img/p22underground-heavy-webfont.woff2") format("woff2"), url("img/p22underground-heavy-webfont.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
+.player-table .score.cards {
+  display: flex;
+  justify-content: center;
 }
+.player-table .score.cards .cards {
+  margin-top: -110px;
+}
+.player-table .score.cards .cards .card:not(:first-child) {
+  margin-top: calc(-1 * var(--card-overlap));
+}
+
 /* make space between buttons on touch devices */
 @media (hover: none) {
   #page-title .action-button.bgabutton, #page-title .bgabutton {
