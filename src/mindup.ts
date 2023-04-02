@@ -246,28 +246,21 @@ class MindUp implements MindUpGame {
                 </div>
             </div>`, `player_board_${player.id}`);
 
-            const handCounter = new ebg.counter();
+            /*const handCounter = new ebg.counter();
             handCounter.create(`playerhand-counter-${playerId}`);
             handCounter.setValue(player.hand.length);
-            this.handCounters[playerId] = handCounter;
+            this.handCounters[playerId] = handCounter;*/
 
-            const scoredCounter = new ebg.counter();
+            /*const scoredCounter = new ebg.counter();
             scoredCounter.create(`scored-counter-${playerId}`);
             scoredCounter.setValue(player.scored);
-            this.scoredCounters[playerId] = scoredCounter;
+            this.scoredCounters[playerId] = scoredCounter;*/
 
             // first player
             dojo.place(`
             <div id="bet-tokens-${player.id}" class="bet-tokens"></div>
             <div id="first-player-token-wrapper-${player.id}" class="first-player-token-wrapper"></div>
             `, `player_board_${player.id}`);
-
-            Object.keys(player.betTokens).forEach(key => {
-                const value = Number(key);
-                for (let i = 0; i < player.betTokens[key]; i++) {
-                    this.addBetToken(playerId, value);
-                }
-            });
 
             if (gamedatas.firstPlayerId == playerId) {
                 dojo.place(`<div id="first-player-token" class="first-player-token"></div>`, `first-player-token-wrapper-${player.id}`);

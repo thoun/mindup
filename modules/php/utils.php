@@ -94,18 +94,25 @@ trait UtilTrait {
         return array_map(fn($dbCard) => new Card($dbCard), array_values($dbResults));
     }
 
-    function setupCards() {
+    function setupCards(array $playersIds) {
         // number cards
         $cards = [];
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 60; $i++) {
             $cards[] = [ 'type' => 1, 'type_arg' => $i, 'nbr' => 1 ];
-        }
-        // bet cards
-        for ($i = 3; $i <= 5; $i++) {
-            $cards[] = [ 'type' => 2, 'type_arg' => $i, 'nbr' => 2 ];
         }
         $this->cards->createCards($cards, 'deck');
         $this->cards->shuffle('deck');
+
+        foreach ($playersIds as $playerId) {
+            $this->cards->pickCards(7, 'deck', $playerId);
+        }
+
+        $tableDb = $this->cards->getCardsOnTop(count($playersIds), 'deck');
+        $table = array_map(fn($dbCard) => new Card($dbCard), array_values($tableDb));
+        usort($table, fn($a, $b) => $a->number - $b->number);
+        foreach ($table as $index => $card) {
+            $this->cards->moveCard($card->id, 'table', $index);
+        }
     }
 
     // return list of cards that can be placed on the player's line

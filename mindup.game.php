@@ -113,7 +113,7 @@ class MindUp extends Table {
         }
 
         // setup the initial game situation here
-        $this->setupCards();
+        $this->setupCards(array_keys($players));
        
 
         // Activate first player (which is in general a good idea :) )
@@ -141,7 +141,7 @@ class MindUp extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_tokens FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // Gather all information about current game situation (visible by player $current_player_id).
@@ -149,23 +149,13 @@ class MindUp extends Table {
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);
 
-            $hand = $this->getCardsByLocation('hand', $playerId);
-            $player['hand'] = $currentPlayerId == $playerId ? $hand : Card::onlyIds($hand);
-
-            $player['line'] = $this->getCardsByLocation('line'.$playerId);
-
-            $player['scored'] = intval($this->cards->countCardInLocation('scored', $playerId));
-            $player['betTokens'] = json_decode($player['player_tokens'], true);
+            if ($currentPlayerId == $playerId) {
+                $player['hand'] = $this->getCardsByLocation('hand', $playerId);
+            }
         }
 
         $result['firstPlayerId'] = $this->getGameStateValue(FIRST_PLAYER);
-        $result['market'] = $this->getCardsByLocation('market');
-        $jackpots = [];
-        for ($i = 1; $i <= 4; $i++) {
-            $jackpots[$i] = Card::onlyIds($this->getCardsByLocation('jackpot', $i));
-        }
-        $result['jackpots'] = $jackpots;
-        $result['deck'] = intval($this->cards->countCardInLocation('deck'));
+        $result['table'] = $this->getCardsByLocation('table');
   
         return $result;
     }

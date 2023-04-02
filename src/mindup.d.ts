@@ -13,10 +13,7 @@ interface Card {
 
 interface MindUpPlayer extends Player {
     playerNo: number;
-    hand: Card[];
-    line: Card[];
-    betTokens: { [value: number]: number };
-    scored: number;
+    hand?: Card[];
 }
 
 interface MindUpGamedatas {
@@ -33,9 +30,7 @@ interface MindUpGamedatas {
 
     // Add here variables you set up in getAllDatas
     firstPlayerId: number;
-    market: Card[];
-    jackpots: { [color: number]: Card[] };
-    deck: number;
+    table: Card[];
 }
 
 interface MindUpGame extends Game {

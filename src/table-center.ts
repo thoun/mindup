@@ -6,7 +6,7 @@ class TableCenter {
     private jackpotCounters: Counter[] = [];
 
     constructor(private game: MindUpGame, gamedatas: MindUpGamedatas) {
-        document.getElementById(`deck`).dataset.count = `${gamedatas.deck}`;
+        /*document.getElementById(`deck`).dataset.count = `${gamedatas.deck}`;
         this.deckCounter = new ebg.counter();
         this.deckCounter.create(`deck-counter`);
         this.deckCounter.setValue(gamedatas.deck);
@@ -40,7 +40,7 @@ class TableCenter {
         this.market = new LineStock<Card>(this.game.cardsManager, document.getElementById(`market`));
         this.market.onCardClick = (card: Card) => this.game.onMarketCardClick(card);
         
-        this.market.addCards(gamedatas.market);
+        this.market.addCards(gamedatas.market);*/
     }
 
     public setSelectable(selectable: boolean, selectableCards: Card[] | null = null) {

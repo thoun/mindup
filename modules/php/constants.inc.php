@@ -1,6 +1,15 @@
 <?php
 
 /*
+ * Colors
+ */
+define('ORANGE', 1);
+define('PINK', 2);
+define('BLUE', 3);
+define('GREEN', 4);
+define('PURPLE', 5);
+
+/*
  * State constants
  */
 define('ST_BGA_GAME_SETUP', 1);
@@ -30,13 +39,6 @@ define('END_SCORE', 100);
  * Constants
  */
 define('FIRST_PLAYER', 10);
-
-
-// colors
-define('RED', 1);
-define('BLUE', 2);
-define('GREEN', 3);
-define('YELLOW', 4);
 
 
 ?>

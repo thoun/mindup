@@ -1277,29 +1277,44 @@ var CardsManager = /** @class */ (function (_super) {
 }(CardManager));
 var TableCenter = /** @class */ (function () {
     function TableCenter(game, gamedatas) {
-        var _this = this;
         this.game = game;
         this.jackpotStocks = [];
         this.jackpotCounters = [];
-        document.getElementById("deck").dataset.count = "".concat(gamedatas.deck);
+        /*document.getElementById(`deck`).dataset.count = `${gamedatas.deck}`;
         this.deckCounter = new ebg.counter();
-        this.deckCounter.create("deck-counter");
+        this.deckCounter.create(`deck-counter`);
         this.deckCounter.setValue(gamedatas.deck);
-        var html = "";
-        for (var i = 1; i <= 4; i++) {
-            html += "\n            <div id=\"jackpot".concat(i, "\" class=\"card-deck\" data-count=\"").concat(gamedatas.jackpots[i].length, "\" data-color=\"").concat(i, "\">\n                <div class=\"jackpot-token\" data-color=\"").concat(i, "\"></div>\n                <span class=\"deck-counter\">\n                    <span id=\"jackpot").concat(i, "-counter\" class=\"conter\"></span>\n                    <span id=\"jackpot").concat(i, "-counter-label\">").concat(gamedatas.jackpots[i].length > 1 ? _('pts') : _('pt'), "</span>\n                </span>\n            </div>\n            ");
+
+        let html = ``;
+
+        for (let i=1; i<=4; i++) {
+            html += `
+            <div id="jackpot${i}" class="card-deck" data-count="${gamedatas.jackpots[i].length}" data-color="${i}">
+                <div class="jackpot-token" data-color="${i}"></div>
+                <span class="deck-counter">
+                    <span id="jackpot${i}-counter" class="conter"></span>
+                    <span id="jackpot${i}-counter-label">${gamedatas.jackpots[i].length > 1 ? _('pts') : _('pt')}</span>
+                </span>
+            </div>
+            `;
         }
-        document.getElementById("decks").insertAdjacentHTML('beforeend', html);
-        for (var i = 1; i <= 4; i++) {
+        document.getElementById(`decks`).insertAdjacentHTML('beforeend', html);
+        
+
+        for (let i=1; i<=4; i++) {
             this.jackpotCounters[i] = new ebg.counter();
-            this.jackpotCounters[i].create("jackpot".concat(i, "-counter"));
+            this.jackpotCounters[i].create(`jackpot${i}-counter`);
             this.jackpotCounters[i].setValue(gamedatas.jackpots[i].length);
-            this.jackpotStocks[i] = new VoidStock(this.game.cardsManager, document.getElementById("jackpot".concat(i)));
+
+            this.jackpotStocks[i] = new VoidStock<Card>(this.game.cardsManager, document.getElementById(`jackpot${i}`));
         }
-        document.getElementById("market-title").innerHTML = _('Market');
-        this.market = new LineStock(this.game.cardsManager, document.getElementById("market"));
-        this.market.onCardClick = function (card) { return _this.game.onMarketCardClick(card); };
-        this.market.addCards(gamedatas.market);
+
+        document.getElementById(`market-title`).innerHTML = _('Market');
+
+        this.market = new LineStock<Card>(this.game.cardsManager, document.getElementById(`market`));
+        this.market.onCardClick = (card: Card) => this.game.onMarketCardClick(card);
+        
+        this.market.addCards(gamedatas.market);*/
     }
     TableCenter.prototype.setSelectable = function (selectable, selectableCards) {
         var _this = this;
@@ -1346,30 +1361,48 @@ var isDebug = window.location.host == 'studio.boardgamearena.com' || window.loca
 var log = isDebug ? console.log.bind(window.console) : function () { };
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
-        var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
         this.currentPlayer = this.playerId == this.game.getPlayerId();
-        var html = "\n        <div id=\"player-table-".concat(this.playerId, "\" class=\"player-table\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"name-wrapper\">").concat(player.name, "</div>\n        ");
+        /*let html = `
+        <div id="player-table-${this.playerId}" class="player-table" style="--player-color: #${player.color};">
+            <div class="name-wrapper">${player.name}</div>
+        `;
         if (this.currentPlayer) {
-            html += "\n            <div class=\"block-with-text hand-wrapper\">\n                <div class=\"block-label\">".concat(_('Your hand'), "</div>\n                <div id=\"player-table-").concat(this.playerId, "-hand\" class=\"hand cards\"></div>\n            </div>            \n            <div class=\"block-with-text\">\n                <div class=\"block-label your-line\">").concat(_('Your line'), "</div>");
+            html += `
+            <div class="block-with-text hand-wrapper">
+                <div class="block-label">${_('Your hand')}</div>
+                <div id="player-table-${this.playerId}-hand" class="hand cards"></div>
+            </div>
+            <div class="block-with-text">
+                <div class="block-label your-line">${_('Your line')}</div>`;
         }
-        html += "\n                <div id=\"player-table-".concat(this.playerId, "-line\" class=\"line cards\"></div>\n                ");
+        html += `
+                <div id="player-table-${this.playerId}-line" class="line cards"></div>
+                `;
         if (this.currentPlayer) {
-            html += "\n            </div>";
+            html += `
+            </div>`;
         }
-        html += "\n            </div>\n        </div>\n        ";
+        html += `
+            </div>
+        </div>
+        `;
         dojo.place(html, document.getElementById('tables'));
+
         if (this.currentPlayer) {
-            this.hand = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-hand")));
-            this.hand.onCardClick = function (card) { return _this.game.onHandCardClick(card); };
+            this.hand = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-hand`));
+            this.hand.onCardClick = (card: Card) => this.game.onHandCardClick(card);
+            
             this.hand.addCards(player.hand);
         }
-        this.line = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-line")));
+        
+        this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
         if (this.currentPlayer) {
-            this.line.onCardClick = function (card) { return _this.game.onLineCardClick(card); };
+            this.line.onCardClick = (card: Card) => this.game.onLineCardClick(card);
         }
-        this.line.addCards(player.line);
+        
+        this.line.addCards(player.line);*/
     }
     PlayerTable.prototype.setSelectable = function (selectable, selectableCards) {
         var _this = this;
@@ -1595,27 +1628,20 @@ var MindUp = /** @class */ (function () {
         return orderedPlayers;
     };
     MindUp.prototype.createPlayerPanels = function (gamedatas) {
-        var _this = this;
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
             // hand + scored cards counter
             dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-".concat(player.id, "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-").concat(player.id, "\"></span> / 2\n                </div>\n                <div id=\"scored-counter-wrapper-").concat(player.id, "\" class=\"scored-counter\">\n                    <div class=\"player-scored-card\"></div> \n                    <span id=\"scored-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
-            var handCounter = new ebg.counter();
-            handCounter.create("playerhand-counter-".concat(playerId));
+            /*const handCounter = new ebg.counter();
+            handCounter.create(`playerhand-counter-${playerId}`);
             handCounter.setValue(player.hand.length);
-            _this.handCounters[playerId] = handCounter;
-            var scoredCounter = new ebg.counter();
-            scoredCounter.create("scored-counter-".concat(playerId));
+            this.handCounters[playerId] = handCounter;*/
+            /*const scoredCounter = new ebg.counter();
+            scoredCounter.create(`scored-counter-${playerId}`);
             scoredCounter.setValue(player.scored);
-            _this.scoredCounters[playerId] = scoredCounter;
+            this.scoredCounters[playerId] = scoredCounter;*/
             // first player
             dojo.place("\n            <div id=\"bet-tokens-".concat(player.id, "\" class=\"bet-tokens\"></div>\n            <div id=\"first-player-token-wrapper-").concat(player.id, "\" class=\"first-player-token-wrapper\"></div>\n            "), "player_board_".concat(player.id));
-            Object.keys(player.betTokens).forEach(function (key) {
-                var value = Number(key);
-                for (var i = 0; i < player.betTokens[key]; i++) {
-                    _this.addBetToken(playerId, value);
-                }
-            });
             if (gamedatas.firstPlayerId == playerId) {
                 dojo.place("<div id=\"first-player-token\" class=\"first-player-token\"></div>", "first-player-token-wrapper-".concat(player.id));
             }
