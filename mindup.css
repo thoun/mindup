@@ -255,8 +255,6 @@ body > .card {
   filter: contrast(0.6);
 }
 .card .card-sides .card-side {
-  background-size: auto 100%;
-  background-image: url("img/cards.jpg");
   border-radius: 10px;
 }
 .card .card-sides .card-side > * {
@@ -264,34 +262,12 @@ body > .card {
   user-select: none;
 }
 .card .card-sides .card-side.front {
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 55pt;
-  text-align: center;
+  background-size: auto 100%;
+  background-image: url("img/card-back.jpg");
 }
-.card .card-sides .card-side.front .center-number {
-  padding-top: 10px;
-}
-.card .card-sides .card-side.front .corner-number {
-  position: absolute;
-  width: 25px;
-  color: white;
-  font-size: 13pt;
-}
-.card .card-sides .card-side.front .corner-number.left {
-  top: 5px;
-  left: 5px;
-}
-.card .card-sides .card-side.front .corner-number.right {
-  top: 5px;
-  right: 5px;
-}
-.card .card-sides .card-side.front .corner-number.rotated {
-  transform: rotateZ(-180deg);
-  bottom: 5px;
-  right: 5px;
+.card .card-sides .card-side.front {
+  background-size: auto 600%;
+  background-image: url("img/cards.jpg");
 }
 .card.selectable:not(.disabled) {
   cursor: pointer;
@@ -308,36 +284,185 @@ body > .card {
 .card.selected:not(.disabled) .card-side {
   box-shadow: unset;
 }
-.card[data-type="0"] .front {
-  background: rgba(255, 255, 255, 0.3137254902);
+.card[data-number="1"] .front {
+  background-position: 0% 0%;
 }
-.card[data-type="0"] .front .placeholder-text {
-  font-size: 12pt;
-  padding: 8px;
+.card[data-number="2"] .front {
+  background-position: 11.1111111111% 0%;
 }
-.card[data-type="1"][data-color="1"] .front {
-  background-position-x: 14.2857142857%;
+.card[data-number="3"] .front {
+  background-position: 22.2222222222% 0%;
 }
-.card[data-type="1"][data-color="2"] .front {
-  background-position-x: 28.5714285714%;
+.card[data-number="4"] .front {
+  background-position: 33.3333333333% 0%;
 }
-.card[data-type="1"][data-color="3"] .front {
-  background-position-x: 42.8571428571%;
+.card[data-number="5"] .front {
+  background-position: 44.4444444444% 0%;
 }
-.card[data-type="1"][data-color="4"] .front {
-  background-position-x: 57.1428571429%;
+.card[data-number="6"] .front {
+  background-position: 55.5555555556% 0%;
 }
-.card[data-type="2"][data-number="3"] .front {
-  background-position-x: 71.4285714286%;
+.card[data-number="7"] .front {
+  background-position: 66.6666666667% 0%;
 }
-.card[data-type="2"][data-number="4"] .front {
-  background-position-x: 85.7142857143%;
+.card[data-number="8"] .front {
+  background-position: 77.7777777778% 0%;
 }
-.card[data-type="2"][data-number="5"] .front {
-  background-position-x: 100%;
+.card[data-number="9"] .front {
+  background-position: 88.8888888889% 0%;
 }
-.card[data-number="100"] .front .center-number {
-  font-size: 45pt;
+.card[data-number="10"] .front {
+  background-position: 100% 0%;
+}
+.card[data-number="11"] .front {
+  background-position: 0% 20%;
+}
+.card[data-number="12"] .front {
+  background-position: 11.1111111111% 20%;
+}
+.card[data-number="13"] .front {
+  background-position: 22.2222222222% 20%;
+}
+.card[data-number="14"] .front {
+  background-position: 33.3333333333% 20%;
+}
+.card[data-number="15"] .front {
+  background-position: 44.4444444444% 20%;
+}
+.card[data-number="16"] .front {
+  background-position: 55.5555555556% 20%;
+}
+.card[data-number="17"] .front {
+  background-position: 66.6666666667% 20%;
+}
+.card[data-number="18"] .front {
+  background-position: 77.7777777778% 20%;
+}
+.card[data-number="19"] .front {
+  background-position: 88.8888888889% 20%;
+}
+.card[data-number="20"] .front {
+  background-position: 100% 20%;
+}
+.card[data-number="21"] .front {
+  background-position: 0% 40%;
+}
+.card[data-number="22"] .front {
+  background-position: 11.1111111111% 40%;
+}
+.card[data-number="23"] .front {
+  background-position: 22.2222222222% 40%;
+}
+.card[data-number="24"] .front {
+  background-position: 33.3333333333% 40%;
+}
+.card[data-number="25"] .front {
+  background-position: 44.4444444444% 40%;
+}
+.card[data-number="26"] .front {
+  background-position: 55.5555555556% 40%;
+}
+.card[data-number="27"] .front {
+  background-position: 66.6666666667% 40%;
+}
+.card[data-number="28"] .front {
+  background-position: 77.7777777778% 40%;
+}
+.card[data-number="29"] .front {
+  background-position: 88.8888888889% 40%;
+}
+.card[data-number="30"] .front {
+  background-position: 100% 40%;
+}
+.card[data-number="31"] .front {
+  background-position: 0% 60%;
+}
+.card[data-number="32"] .front {
+  background-position: 11.1111111111% 60%;
+}
+.card[data-number="33"] .front {
+  background-position: 22.2222222222% 60%;
+}
+.card[data-number="34"] .front {
+  background-position: 33.3333333333% 60%;
+}
+.card[data-number="35"] .front {
+  background-position: 44.4444444444% 60%;
+}
+.card[data-number="36"] .front {
+  background-position: 55.5555555556% 60%;
+}
+.card[data-number="37"] .front {
+  background-position: 66.6666666667% 60%;
+}
+.card[data-number="38"] .front {
+  background-position: 77.7777777778% 60%;
+}
+.card[data-number="39"] .front {
+  background-position: 88.8888888889% 60%;
+}
+.card[data-number="40"] .front {
+  background-position: 100% 60%;
+}
+.card[data-number="41"] .front {
+  background-position: 0% 80%;
+}
+.card[data-number="42"] .front {
+  background-position: 11.1111111111% 80%;
+}
+.card[data-number="43"] .front {
+  background-position: 22.2222222222% 80%;
+}
+.card[data-number="44"] .front {
+  background-position: 33.3333333333% 80%;
+}
+.card[data-number="45"] .front {
+  background-position: 44.4444444444% 80%;
+}
+.card[data-number="46"] .front {
+  background-position: 55.5555555556% 80%;
+}
+.card[data-number="47"] .front {
+  background-position: 66.6666666667% 80%;
+}
+.card[data-number="48"] .front {
+  background-position: 77.7777777778% 80%;
+}
+.card[data-number="49"] .front {
+  background-position: 88.8888888889% 80%;
+}
+.card[data-number="50"] .front {
+  background-position: 100% 80%;
+}
+.card[data-number="51"] .front {
+  background-position: 0% 100%;
+}
+.card[data-number="52"] .front {
+  background-position: 11.1111111111% 100%;
+}
+.card[data-number="53"] .front {
+  background-position: 22.2222222222% 100%;
+}
+.card[data-number="54"] .front {
+  background-position: 33.3333333333% 100%;
+}
+.card[data-number="55"] .front {
+  background-position: 44.4444444444% 100%;
+}
+.card[data-number="56"] .front {
+  background-position: 55.5555555556% 100%;
+}
+.card[data-number="57"] .front {
+  background-position: 66.6666666667% 100%;
+}
+.card[data-number="58"] .front {
+  background-position: 77.7777777778% 100%;
+}
+.card[data-number="59"] .front {
+  background-position: 88.8888888889% 100%;
+}
+.card[data-number="60"] .front {
+  background-position: 100% 100%;
 }
 
 @keyframes selectable-card-animation {

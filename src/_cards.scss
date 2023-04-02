@@ -14,8 +14,6 @@
 
     .card-sides {
         .card-side {
-            background-size: auto 100%;
-            background-image: url('img/cards.jpg');
             border-radius: 10px;
 
             &>* {
@@ -23,40 +21,14 @@
                 user-select: none;
             }
 
+            &.front {  
+                background-size: auto 100%;              
+                background-image: url('img/card-back.jpg');
+            }
+
             &.front {
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 55pt;
-                text-align: center;
-
-                .center-number {
-                    padding-top: 10px;
-                }
-
-                .corner-number {
-                    position: absolute;
-                    width: 25px;
-                    color: white;
-                    font-size: 13pt;
-
-                    &.left {
-                        top: 5px;
-                        left: 5px;
-                    }
-
-                    &.right {
-                        top: 5px;
-                        right: 5px;
-                    }
-
-                    &.rotated {
-                        transform: rotateZ(-180deg);                        
-                        bottom: 5px;
-                        right: 5px;
-                    }
-                }
+                background-size: auto 600%;
+                background-image: url('img/cards.jpg');
             }
         }
     }    
@@ -80,33 +52,12 @@
         }
     } 
 
-    &[data-type="0"] .front {
-        background: #FFFFFF50;
-
-        .placeholder-text {
-            font-size: 12pt;
-            padding: 8px;
-        }
-    }
-
-    &[data-type="1"] {
-        @for $color from 1 through 4 {
-            &[data-color="#{$color}"] .front {
-                background-position-x: #{($color) * 100% / 7};
+    @for $line from 0 through 5 {
+        @for $col from 1 through 10 {
+            &[data-number="#{$line * 10 + $col}"] .front {
+                background-position: #{($col - 1) * 100% / 9} #{$line * 100% / 5};
             }
         }
-    }
-
-    &[data-type="2"] {
-        @for $number from 3 through 5 {
-            &[data-number="#{$number}"] .front {
-                background-position-x: #{($number + 2) * 100% / 7};
-            }
-        }
-    }
-
-    &[data-number="100"] .front .center-number {
-        font-size: 45pt;
     }
 }
 

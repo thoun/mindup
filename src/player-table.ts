@@ -12,7 +12,7 @@ class PlayerTable {
         this.playerId = Number(player.id);
         this.currentPlayer = this.playerId == this.game.getPlayerId();
 
-        /*let html = `
+        let html = `
         <div id="player-table-${this.playerId}" class="player-table" style="--player-color: #${player.color};">
             <div class="name-wrapper">${player.name}</div>
         `;
@@ -45,7 +45,7 @@ class PlayerTable {
             this.hand.addCards(player.hand);
         }
         
-        this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
+        /*this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
         if (this.currentPlayer) {
             this.line.onCardClick = (card: Card) => this.game.onLineCardClick(card);
         }

@@ -1361,43 +1361,26 @@ var isDebug = window.location.host == 'studio.boardgamearena.com' || window.loca
 var log = isDebug ? console.log.bind(window.console) : function () { };
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
+        var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
         this.currentPlayer = this.playerId == this.game.getPlayerId();
-        /*let html = `
-        <div id="player-table-${this.playerId}" class="player-table" style="--player-color: #${player.color};">
-            <div class="name-wrapper">${player.name}</div>
-        `;
+        var html = "\n        <div id=\"player-table-".concat(this.playerId, "\" class=\"player-table\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"name-wrapper\">").concat(player.name, "</div>\n        ");
         if (this.currentPlayer) {
-            html += `
-            <div class="block-with-text hand-wrapper">
-                <div class="block-label">${_('Your hand')}</div>
-                <div id="player-table-${this.playerId}-hand" class="hand cards"></div>
-            </div>
-            <div class="block-with-text">
-                <div class="block-label your-line">${_('Your line')}</div>`;
+            html += "\n            <div class=\"block-with-text hand-wrapper\">\n                <div class=\"block-label\">".concat(_('Your hand'), "</div>\n                <div id=\"player-table-").concat(this.playerId, "-hand\" class=\"hand cards\"></div>\n            </div>            \n            <div class=\"block-with-text\">\n                <div class=\"block-label your-line\">").concat(_('Your line'), "</div>");
         }
-        html += `
-                <div id="player-table-${this.playerId}-line" class="line cards"></div>
-                `;
+        html += "\n                <div id=\"player-table-".concat(this.playerId, "-line\" class=\"line cards\"></div>\n                ");
         if (this.currentPlayer) {
-            html += `
-            </div>`;
+            html += "\n            </div>";
         }
-        html += `
-            </div>
-        </div>
-        `;
+        html += "\n            </div>\n        </div>\n        ";
         dojo.place(html, document.getElementById('tables'));
-
         if (this.currentPlayer) {
-            this.hand = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-hand`));
-            this.hand.onCardClick = (card: Card) => this.game.onHandCardClick(card);
-            
+            this.hand = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-hand")));
+            this.hand.onCardClick = function (card) { return _this.game.onHandCardClick(card); };
             this.hand.addCards(player.hand);
         }
-        
-        this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
+        /*this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
         if (this.currentPlayer) {
             this.line.onCardClick = (card: Card) => this.game.onLineCardClick(card);
         }
