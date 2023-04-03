@@ -1248,16 +1248,10 @@ var TableCenter = /** @class */ (function () {
         this.tableOver.addCards(gamedatas.table);
         playersIds.forEach(function (playerId) { return playerCardsDiv.querySelector("[data-slot-id=\"".concat(playerId, "\"]")).appendChild(_this.createPlayerBlock(playerId)); });
     }
-    TableCenter.prototype.placeCardUnder = function (card) {
-        this.tableUnder.addCard(card);
-    };
-    TableCenter.prototype.moveTableLine = function () {
-        this.tableOver.addCards(this.tableUnder.getCards());
-    };
     TableCenter.prototype.createPlayerBlock = function (playerId) {
         var player = this.game.getPlayer(playerId);
         var block = document.createElement('div');
-        block.classList.add('player-block', 'top');
+        block.classList.add('player-block');
         var url = document.getElementById("avatar_".concat(playerId)).src;
         // ? Custom image : Bga Image
         //url = url.replace('_32', url.indexOf('data/avatar/defaults') > 0 ? '' : '_184');
@@ -1273,6 +1267,14 @@ var TableCenter = /** @class */ (function () {
     TableCenter.prototype.revealCards = function (cards) {
         var _this = this;
         cards.forEach(function (card) { return _this.playerCards.setCardVisible(card, true); });
+    };
+    TableCenter.prototype.placeCardUnder = function (playerId, card) {
+        this.tableUnder.addCard(card);
+        document.getElementById("table-under").querySelector("[data-slot-id=\"".concat(card.locationArg, "\"]")).appendChild(this.createPlayerBlock(playerId));
+    };
+    TableCenter.prototype.moveTableLine = function () {
+        this.tableOver.addCards(this.tableUnder.getCards());
+        Array.from(document.querySelectorAll("#table-under .player-block")).forEach(function (elem) { return elem.remove(); });
     };
     return TableCenter;
 }());
@@ -1321,6 +1323,17 @@ var PlayerTable = /** @class */ (function () {
     }
     PlayerTable.prototype.setSelectable = function (selectable) {
         document.getElementById("player-table-".concat(this.playerId, "-hand")).classList.toggle('selectable', selectable);
+    };
+    PlayerTable.prototype.newRound = function (costs) {
+        for (var i = 0; i < 5; i++) {
+            if (this.currentPlayer) {
+                this.hand.addCards(this.scores[i].getCards());
+            }
+            else {
+                this.scores[i].removeAll();
+            }
+        }
+        this.setCosts(costs);
     };
     PlayerTable.prototype.setCosts = function (costs) {
         for (var i = 0; i < 5; i++) {
@@ -1513,6 +1526,8 @@ var MindUp = /** @class */ (function () {
             ['placeCardUnder', ANIMATION_MS],
             ['scoreCard', ANIMATION_MS * 2],
             ['moveTableLine', ANIMATION_MS],
+            ['delayBeforeNewRound', ANIMATION_MS],
+            ['newCard', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
@@ -1520,7 +1535,7 @@ var MindUp = /** @class */ (function () {
         });
     };
     MindUp.prototype.notif_newRound = function (notif) {
-        this.playersTables.forEach(function (table) { return table.setCosts(notif.args.costs); });
+        this.playersTables.forEach(function (table) { return table.newRound(notif.args.costs); });
     };
     MindUp.prototype.notif_selectedCard = function (notif) {
         var currentPlayer = this.getPlayerId() == notif.args.playerId;
@@ -1543,7 +1558,7 @@ var MindUp = /** @class */ (function () {
         this.tableCenter.revealCards(notif.args.cards);
     };
     MindUp.prototype.notif_placeCardUnder = function (notif) {
-        this.tableCenter.placeCardUnder(notif.args.card);
+        this.tableCenter.placeCardUnder(notif.args.playerId, notif.args.card);
     };
     MindUp.prototype.notif_scoreCard = function (notif) {
         this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
@@ -1551,6 +1566,10 @@ var MindUp = /** @class */ (function () {
     };
     MindUp.prototype.notif_moveTableLine = function () {
         this.tableCenter.moveTableLine();
+    };
+    MindUp.prototype.notif_delayBeforeNewRound = function () { };
+    MindUp.prototype.notif_newCard = function (notif) {
+        this.getCurrentPlayerTable().hand.addCard(notif.args.card);
     };
     /*private getColorName(color: number) {
         switch (color) {
@@ -1566,7 +1585,7 @@ var MindUp = /** @class */ (function () {
     MindUp.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                ['scoredCard', 'cardOver', 'cardUnder'].forEach(function (attr) {
+                ['scoredCard', 'cardOver', 'cardUnder', 'addedCard'].forEach(function (attr) {
                     if ((typeof args[attr] !== 'string' || args[attr][0] !== '<') && args[attr + 'Obj']) {
                         var obj = args[attr + 'Obj'];
                         args[attr] = "<strong data-color=\"".concat(obj.color, "\">").concat(obj.number, "</strong>");
@@ -1576,7 +1595,7 @@ var MindUp = /** @class */ (function () {
                     }
                 });
                 for (var property in args) {
-                    if (['column', 'incScoreColumn', 'incScoreCard'].includes(property) && args[property][0] != '<') {
+                    if (['column', 'incScoreColumn', 'incScoreCard', 'roundNumber', 'totalScore', 'roundScore'].includes(property) && args[property][0] != '<') {
                         args[property] = "<strong>".concat(_(args[property]), "</strong>");
                     }
                 }

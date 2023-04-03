@@ -19,6 +19,7 @@
             position: absolute;
             left: 0;
             right: 0;
+            top: -32px;
             background: white;
             border-radius: 17px;
             display: flex;
@@ -26,10 +27,6 @@
             gap: 5px;
             box-shadow: 0 0 2px 2px #00000088;
             z-index: 1;
-
-            &.top {
-                top: -32px;
-            }
 
             .player-block-avatar {
                 min-width: 32px;

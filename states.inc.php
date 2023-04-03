@@ -96,7 +96,6 @@ $gameGameStates = [
         "description" => "",
         "type" => "game",
         "action" => "stNewRound",
-        "updateGameProgression" => true,
         "transitions" => [
             "next" => ST_MULTIPLAYER_CHOOSE_CARD,
         ],
@@ -107,8 +106,20 @@ $gameGameStates = [
         "description" => clienttranslate('Revealing and placing chosen cards...'),
         "type" => "game",
         "action" => "stRevealCards",
+        "updateGameProgression" => true,
         "transitions" => [
             "next" => ST_MULTIPLAYER_CHOOSE_CARD,
+            "lastCard" => ST_PLAY_LAST_CARD,
+        ],
+    ],
+
+    ST_PLAY_LAST_CARD => [
+        "name" => "playLastCard",
+        "description" => clienttranslate('Score hand last card...'),
+        "type" => "game",
+        "action" => "stPlayLastCard",
+        "updateGameProgression" => true,
+        "transitions" => [
             "endRound" => ST_END_ROUND,
         ],
     ],

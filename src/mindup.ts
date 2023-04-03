@@ -230,6 +230,8 @@ class MindUp implements MindUpGame {
             ['placeCardUnder', ANIMATION_MS],
             ['scoreCard', ANIMATION_MS * 2],
             ['moveTableLine', ANIMATION_MS],
+            ['delayBeforeNewRound', ANIMATION_MS],
+            ['newCard', 1],
         ];
     
         notifs.forEach((notif) => {
@@ -239,7 +241,7 @@ class MindUp implements MindUpGame {
     }
 
     notif_newRound(notif: Notif<NotifNewRoundArgs>) {
-        this.playersTables.forEach(table => table.setCosts(notif.args.costs));
+        this.playersTables.forEach(table => table.newRound(notif.args.costs));
     }
 
     notif_selectedCard(notif: Notif<NotifSelectedCardArgs>) {
@@ -264,7 +266,7 @@ class MindUp implements MindUpGame {
     }
 
     notif_placeCardUnder(notif: Notif<NotifPlayerCardArgs>) {
-        this.tableCenter.placeCardUnder(notif.args.card);
+        this.tableCenter.placeCardUnder(notif.args.playerId, notif.args.card);
     }
 
     notif_scoreCard(notif: Notif<NotifScoredCardArgs>) {
@@ -275,6 +277,12 @@ class MindUp implements MindUpGame {
 
     notif_moveTableLine() {
         this.tableCenter.moveTableLine();
+    }
+
+    notif_delayBeforeNewRound() {}
+
+    notif_newCard(notif: Notif<NotifPlayerCardArgs>) {
+        this.getCurrentPlayerTable().hand.addCard(notif.args.card);
     }
 
     /*private getColorName(color: number) {
@@ -293,7 +301,7 @@ class MindUp implements MindUpGame {
         try {
             if (log && args && !args.processed) {
 
-                ['scoredCard', 'cardOver', 'cardUnder'].forEach(attr => {
+                ['scoredCard', 'cardOver', 'cardUnder', 'addedCard'].forEach(attr => {
                     if ((typeof args[attr] !== 'string' || args[attr][0] !== '<') && args[attr + 'Obj']) {
                         const obj: Card = args[attr + 'Obj'];
                         args[attr] = `<strong data-color="${obj.color}">${obj.number}</strong>`;
@@ -304,10 +312,11 @@ class MindUp implements MindUpGame {
                 });
 
                 for (const property in args) {
-                    if (['column', 'incScoreColumn', 'incScoreCard'].includes(property) && args[property][0] != '<') {
+                    if (['column', 'incScoreColumn', 'incScoreCard', 'roundNumber', 'totalScore', 'roundScore'].includes(property) && args[property][0] != '<') {
                         args[property] = `<strong>${_(args[property])}</strong>`;
                     }
                 }
+                
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);

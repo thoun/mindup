@@ -24,9 +24,29 @@ trait StateTrait {
         }
         $this->setGlobalVariable(COSTS, $affectedCosts);
 
-        self::notifyAllPlayers('newRound', '', [
+        $playersIds = $this->getPlayersIds();
+        self::notifyAllPlayers('delayBeforeNewRound', '', []);
+
+        // get back scored card to hand
+        foreach ($playersIds as $playerId) {
+            $this->cards->moveAllCardsInLocation('score'.$playerId, 'hand', null, $playerId);
+        }
+        self::notifyAllPlayers('newRound', clienttranslate('Scoring cards order have been changed'), [
             'costs' => $affectedCosts,
         ]);
+        
+        if ($this->getStat('roundNumber') >= 1) {
+            foreach ($playersIds as $playerId) {
+                $card = new Card($this->cards->pickCard('deck', $playerId));
+
+                self::notifyPlayer($playerId, 'newCard', clienttranslate('A new card has been added to your hand : ${addedCard}'), [
+                    'card' => $card,
+                    'addedCard' => $card->number,
+                    'addedCardObj' => $card,
+                    'preserve' => ['addedCardObj'],
+                ]);
+            }
+        }
 
         $this->gamestate->nextState('next');
     }
@@ -49,6 +69,8 @@ trait StateTrait {
         $table = $this->getCardsByLocation('table');
 
         usort($tableUnder, fn($a, $b) => $a->number - $b->number);
+        $this->incStat(1, 'playedCards');
+
         foreach ($tableUnder as $index => $cardUnder) {
             $this->cards->moveCard($cardUnder->id, 'tableUnder', $index);
             $cardUnder->locationArg = $index;
@@ -92,23 +114,76 @@ trait StateTrait {
                 'incScore' => $logCard->points,
                 'preserve' => ['scoredCardObj'],
             ]);
+
+            $this->incStat(1, 'playedCards', $cardUnder->playerId);
         }
 
         $this->cards->moveAllCardsInLocationKeepOrder('tableUnder', 'table');
         self::notifyAllPlayers('moveTableLine', '', []);
 
-        $this->gamestate->nextState('next');
+        $lastCard = in_array(intval($this->getStat('playedCards')), [6, 14, 23]);
+        $this->gamestate->nextState($lastCard ? 'lastCard' : 'next');
+    }
+
+    function stPlayLastCard() {
+        $hands = $this->getCardsByLocation('hand');
+
+        $costs = $this->getGlobalVariable(COSTS, true);
+
+        $this->incStat(1, 'playedCards');
+        foreach ($hands as $card) {
+            $playerId = $card->locationArg;
+            $col = $this->getCol($playerId, $card->color);
+            $this->cards->moveCard($card->id, 'score'.$playerId, $col);
+            $card->locationArg = $col;
+            $logCard = json_decode(json_encode($card));
+
+            $playerScore = $this->updatePlayerScore($playerId, $costs);
+
+            self::notifyAllPlayers('scoreCard', clienttranslate('${player_name} adds card ${scoredCard} to its score column ${column} and scores ${incScoreColumn} points for score card and ${incScoreCard} points for added card points'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'card' => $logCard,
+                'scoredCard' => $logCard->number,
+                'scoredCardObj' => $logCard,
+                'incScoreColumn' => $costs[$col],
+                'incScoreCard' => $logCard->points,
+                'column' => $col + 1,
+                'playerScore' => $playerScore,
+                'incScore' => $logCard->points,
+                'preserve' => ['scoredCardObj'],
+            ]);
+
+            $this->incStat(1, 'playedCards', $playerId);
+        }
+
+        $this->gamestate->nextState('endRound');
     }
 
     function stEndRound() {
         $this->incStat(1, 'roundNumber');
 
-        $lastRound = $this->getStat('roundNumber') >= 3;
+        $roundNumber = $this->getStat('roundNumber');
+        $lastRound = $roundNumber >= 3;
+        
+
+        $playersIds = $this->getPlayersIds();
+        foreach ($playersIds as $playerId) {
+            $score = $this->getPlayerScore($playerId);
+            $scoreAux = $this->getPlayerScoreAux($playerId);
+            self::notifyAllPlayers('log', clienttranslate('${player_name} ends round ${roundNumber} with ${totalScore} points (${roundScore} points this round)'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'roundNumber' => $roundNumber,
+                'totalScore' => $score + $scoreAux,
+                'roundScore' => $scoreAux,
+            ]);
+        }
 
         // apply round score (scoreAux) to score
         $this->DbQuery("UPDATE player SET `player_score` = `player_score` + `player_score_aux`");
 
-        $this->gamestate->nextState($lastRound ? 'endDeck' : 'newRound');
+        $this->gamestate->nextState($lastRound ? 'endScore' : 'newRound');
     }
 
     function stEndScore() {

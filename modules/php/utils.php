@@ -80,6 +80,10 @@ trait UtilTrait {
         return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
+    function getPlayerScoreAux(int $playerId) {
+        return intval($this->getUniqueValueFromDB("SELECT player_score_aux FROM player where `player_id` = $playerId"));
+    }
+
     function getPlayerSelectedCard(int $playerId) {
         $cards = $this->getCardsByLocation('selected', $playerId);
         return $cards != null ? $cards[0] : null;

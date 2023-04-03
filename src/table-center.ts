@@ -28,19 +28,11 @@ class TableCenter {
 
         playersIds.forEach(playerId => playerCardsDiv.querySelector(`[data-slot-id="${playerId}"]`).appendChild(this.createPlayerBlock(playerId)));
     }
-    
-    public placeCardUnder(card: Card) {
-        this.tableUnder.addCard(card);
-    }
-    
-    public moveTableLine() {
-        this.tableOver.addCards(this.tableUnder.getCards());
-    }
 
     public createPlayerBlock(playerId: number) {
         const player = this.game.getPlayer(playerId);
         const block = document.createElement('div');
-        block.classList.add('player-block', 'top');
+        block.classList.add('player-block');
 
         let url = (document.getElementById(`avatar_${playerId}`) as HTMLImageElement).src;
         // ? Custom image : Bga Image
@@ -67,5 +59,15 @@ class TableCenter {
     
     public revealCards(cards: Card[]) {
         cards.forEach(card => this.playerCards.setCardVisible(card, true));
+    }
+    
+    public placeCardUnder(playerId: number, card: Card) {
+        this.tableUnder.addCard(card);
+        document.getElementById(`table-under`).querySelector(`[data-slot-id="${card.locationArg}"]`).appendChild(this.createPlayerBlock(playerId));
+    }
+    
+    public moveTableLine() {
+        this.tableOver.addCards(this.tableUnder.getCards());
+        Array.from(document.querySelectorAll(`#table-under .player-block`)).forEach(elem => elem.remove());
     }
 }

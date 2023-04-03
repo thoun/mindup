@@ -515,6 +515,7 @@ body > .card {
   position: absolute;
   left: 0;
   right: 0;
+  top: -32px;
   background: white;
   border-radius: 17px;
   display: flex;
@@ -522,9 +523,6 @@ body > .card {
   gap: 5px;
   box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.5333333333);
   z-index: 1;
-}
-#table-center .slot .player-block.top {
-  top: -32px;
 }
 #table-center .slot .player-block .player-block-avatar {
   min-width: 32px;

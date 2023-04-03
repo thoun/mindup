@@ -93,14 +93,7 @@ class MindUp extends Table {
         $this->initStat('table', 'roundNumber', 0);
         foreach(['table', 'player'] as $type) {
             foreach([
-                "increasingLines", "decreasingLines",            
-                "marketToHand", "marketToLine", "playedCardFromHand",            
-                "closedLines", "closedLinesForced",                 
-                "betCardsPlayed", "betWon", "betLost",
-                "jackpotCollected",
-                "pointsFromJackpots",
-                "pointsFromLines",
-                "pointsFromBet",
+                "playedCards",
             ] as $name) {
                 $this->initStat($type, $name, 0);
             }
@@ -178,8 +171,8 @@ class MindUp extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        $round = intval($this->getStat('roundNumber')); // 0 based
-        return intval($this->cards->countCardInLocation('deck'));
+        $playedCards = intval($this->getStat('playedCards')); // 0 based, 24 cards played in total
+        return $playedCards * 100 / 24;
     }
 
 //////////////////////////////////////////////////////////////////////////////

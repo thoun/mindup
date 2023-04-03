@@ -20,6 +20,8 @@ define('ST_MULTIPLAYER_CHOOSE_CARD', 30);
 
 define('ST_REVEAL_CARDS', 50);
 
+define('ST_PLAY_LAST_CARD', 60);
+
 define('ST_END_ROUND', 80);
 
 define('ST_END_SCORE', 90);
