@@ -90,6 +90,8 @@ trait StateTrait {
             ]);
         }
 
+        self::notifyAllPlayers('delayAfterLineUnder', '', []);
+
         $costs = $this->getGlobalVariable(COSTS, true);
 
         foreach ($tableUnder as $index => $cardUnder) {

@@ -228,6 +228,7 @@ class MindUp implements MindUpGame {
             ['delayBeforeReveal', ANIMATION_MS],
             ['revealCards', ANIMATION_MS * 2],
             ['placeCardUnder', ANIMATION_MS],
+            ['delayAfterLineUnder', ANIMATION_MS * 2],
             ['scoreCard', ANIMATION_MS * 2],
             ['moveTableLine', ANIMATION_MS],
             ['delayBeforeNewRound', ANIMATION_MS],
@@ -268,6 +269,8 @@ class MindUp implements MindUpGame {
     notif_placeCardUnder(notif: Notif<NotifPlayerCardArgs>) {
         this.tableCenter.placeCardUnder(notif.args.playerId, notif.args.card);
     }
+    
+    notif_delayAfterLineUnder() {}
 
     notif_scoreCard(notif: Notif<NotifScoredCardArgs>) {
         this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);

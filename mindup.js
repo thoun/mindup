@@ -1228,9 +1228,10 @@ var TableCenter = /** @class */ (function () {
     function TableCenter(game, gamedatas) {
         var _this = this;
         this.game = game;
-        var playersIds = gamedatas.playerorder.map(function (key) { return Number(key); });
+        var playersIds = (gamedatas.playerorder.length > 1 ? gamedatas.playerorder : Object.keys(gamedatas.players)).map(function (key) { return Number(key); });
         var playerCount = playersIds.length;
         var slotSettings = {
+            wrap: 'nowrap',
             slotsIds: [],
             mapCardToSlot: function (card) { return card.locationArg; },
         };
@@ -1239,6 +1240,7 @@ var TableCenter = /** @class */ (function () {
         }
         var playerCardsDiv = document.getElementById("player-cards");
         this.playerCards = new SlotStock(this.game.cardsManager, playerCardsDiv, {
+            wrap: 'nowrap',
             slotsIds: playersIds,
             mapCardToSlot: function (card) { return card.locationArg; },
         });
@@ -1524,6 +1526,7 @@ var MindUp = /** @class */ (function () {
             ['delayBeforeReveal', ANIMATION_MS],
             ['revealCards', ANIMATION_MS * 2],
             ['placeCardUnder', ANIMATION_MS],
+            ['delayAfterLineUnder', ANIMATION_MS * 2],
             ['scoreCard', ANIMATION_MS * 2],
             ['moveTableLine', ANIMATION_MS],
             ['delayBeforeNewRound', ANIMATION_MS],
@@ -1560,6 +1563,7 @@ var MindUp = /** @class */ (function () {
     MindUp.prototype.notif_placeCardUnder = function (notif) {
         this.tableCenter.placeCardUnder(notif.args.playerId, notif.args.card);
     };
+    MindUp.prototype.notif_delayAfterLineUnder = function () { };
     MindUp.prototype.notif_scoreCard = function (notif) {
         this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
         this.setScore(notif.args.playerId, notif.args.playerScore);

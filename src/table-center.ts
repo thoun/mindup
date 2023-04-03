@@ -4,10 +4,11 @@ class TableCenter {
     public tableUnder: SlotStock<Card>;
 
     constructor(private game: MindUpGame, gamedatas: MindUpGamedatas) {
-        const playersIds = gamedatas.playerorder.map(key => Number(key));
+        const playersIds = (gamedatas.playerorder.length > 1 ? gamedatas.playerorder : Object.keys(gamedatas.players)).map(key => Number(key));
         const playerCount = playersIds.length;
 
         const slotSettings = {
+            wrap: 'nowrap',
             slotsIds: [],
             mapCardToSlot: card => card.locationArg,
         };
@@ -17,6 +18,7 @@ class TableCenter {
 
         const playerCardsDiv = document.getElementById(`player-cards`);
         this.playerCards = new SlotStock<Card>(this.game.cardsManager, playerCardsDiv, {
+            wrap: 'nowrap',
             slotsIds: playersIds,
             mapCardToSlot: card => card.locationArg,
         });
