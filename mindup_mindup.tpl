@@ -3,6 +3,7 @@
 <div id="table">
     <div id="tables-and-center">
         <div id="table-center">
+            <div id="objectives" class="card-line"></div>
             <div id="player-cards" class="card-line label-top"></div>
             <div id="table-over" class="card-line"></div>
             <div id="table-under" class="card-line label-top"></div>

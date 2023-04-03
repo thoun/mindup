@@ -168,23 +168,129 @@ trait UtilTrait {
         }
     }
 
-    function updatePlayerScore(int $playerId, array $costs) {
+    function getColByColor(array $scoredCards, int $color) {
+        $scoreCardsOfColor = $this->array_find($scoredCards, fn($card) => $card->color == $color);
+
+        return $scoreCardsOfColor !== null ? $scoreCardsOfColor->locationArg : null;
+    }
+
+    function getPlayerCardCountForColor(int $color) {
+        $cardCountForColor = [];
+
+        $playersIds = $this->getPlayersIds();
+        foreach($playersIds as $playerId) {
+            $scoredCards = $this->getCardsByLocation('score'.$playerId);
+            $scoresCardsOfColor = array_values(array_filter($scoredCards, fn($card) => $card->color == $color));
+            $cardCountForColor[$playerId] = count($scoresCardsOfColor);
+        }
+
+        return $cardCountForColor;
+    }
+
+    function getObjectivePoints(int $objective, array $scoredCards, array $cardsByColor, array $costs) {        
+        switch ($objective) {
+            case 1: return in_array(count($cardsByColor[ORANGE]), [1, 3]) ? 2 : 0;
+            case 2: $col = $this->getColByColor($scoredCards, ORANGE); return $col !== null && in_array($costs[$col], [1, 2]) ? -2 : 0;
+            case 3: return in_array(count($cardsByColor[BLUE]), [2, 4]) ? 2 : 0;
+            case 4: 
+                $blueCount = count($cardsByColor[BLUE]);
+                return !$this->array_some($cardsByColor, fn($colorCards) => count($colorCards) > $blueCount) ? 2 : 0;
+            case 5: 
+                $currentPlayerCount = count($cardsByColor[PINK]);
+                $cardCountForColor = $this->getPlayerCardCountForColor(PINK);
+                return !$this->array_some($cardCountForColor, fn($cardCount) => $cardCount < $currentPlayerCount) == 3 ? -2 : 0;
+            case 6: 
+                $currentPlayerCount = count($cardsByColor[PINK]);
+                $cardCountForColor = $this->getPlayerCardCountForColor(PINK);
+                return !$this->array_some($cardCountForColor, fn($cardCount) => $cardCount > $currentPlayerCount) == 3 ? 2 : 0;
+            case 7: 
+                $lastColor = null;
+                for ($i=0; $i<5; $i++) {
+                    $scoresCardsOfColor = array_values(array_filter($scoredCards, fn($card) => $card->locationArg == $i));
+                    if (count($scoresCardsOfColor) > 0) {
+                        $lastColor = $scoresCardsOfColor[0]->color;
+                    }
+                }
+                return $lastColor == GREEN ? 2 : 0;
+            case 8: $col = $this->getColByColor($scoredCards, GREEN); return $col !== null && in_array($costs[$col], [4, 5]) ? 2 : 0;
+            case 9: return count($cardsByColor[PURPLE]) >= count($cardsByColor[ORANGE]) ? 2 : 0;
+            case 10: 
+                $currentPlayerCount = count($cardsByColor[PURPLE]);
+                $cardCountForColor = $this->getPlayerCardCountForColor(PURPLE);
+                return !$this->array_some($cardCountForColor, fn($cardCount) => $cardCount > $currentPlayerCount) == 3 ? -2 : 0;
+            case 11: return count(array_filter($cardsByColor, fn($cards) => count($cards) > 0)) == 5 ? 2 : 0;
+            case 12: return count(array_filter($cardsByColor, fn($cards) => count($cards) > 0)) == 3 ? 2 : 0;
+            case 13: return $this->array_some($cardsByColor, fn($colorCards) => count($colorCards) == 3) ? -2 : 0;
+            case 14: return $this->array_some($cardsByColor, fn($colorCards) => count($colorCards) == 4) ? 2 : 0;
+        }
+        return 0;
+    }
+
+    function updatePlayerScore(int $playerId, array $costs, array $objectives) {
         $roundScore = 0;
 
-        $scoresCards = $this->getCardsByLocation('score'.$playerId);
+        $scoredCards = $this->getCardsByLocation('score'.$playerId);
+        $cardsByColor = [
+            ORANGE => [],
+            PINK => [],
+            BLUE => [],
+            GREEN => [],
+            PURPLE => [],
+        ];
 
         for ($i=0; $i<5; $i++) {
-            $scoresCardsOfColor = array_values(array_filter($scoresCards, fn($card) => $card->locationArg == $i));
+            $scoresCardsOfColor = array_values(array_filter($scoredCards, fn($card) => $card->locationArg == $i));
             foreach ($scoresCardsOfColor as $card) {
                 $roundScore += $costs[$i] + $card->points;
+                $cardsByColor[$card->color][] = $card;
             }
         }
 
-        // TODO apply variant cards points
+        //$roundScoreBefore = $roundScore;
+        foreach ($objectives as $objective) {
+            $roundScore += $this->getObjectivePoints($objective, $scoredCards, $cardsByColor, $costs);
+        }
+
+        /*$debug = [];
+        foreach ($objectives as $objective) {
+            $debug[$objective] = $this->getObjectivePoints($objective, $scoredCards, $cardsByColor, $costs);
+        }
+        self::notifyAllPlayers('log', json_encode([$playerId, $roundScoreBefore, $debug, $roundScore]), []);*/
 
         $this->DbQuery("UPDATE player SET `player_score_aux` = $roundScore WHERE `player_id` = $playerId");
 
         return $this->getPlayerScore($playerId) + $roundScore;
+    }
+
+    function getBonusObjectivesNumber() {
+        return intval($this->getGameStateValue(BONUS_OBJECTIVES_OPTION));
+    }
+
+    function setBonusObjectives(bool $firstRound) {
+        $number = $this->getBonusObjectivesNumber();
+
+        if ($number == 0 || ($number >= 3 && !$firstRound)) {
+            return;
+        }
+
+        $selectedLetters = [];
+        $availableLetters = [0, 1, 2, 3, 4, 5, 6];
+
+        for ($i = 0; $i < $number; $i++) {
+            $index = bga_rand(1, count($availableLetters)) - 1;
+            $selectedLetters[] = $availableLetters[$index];
+            array_splice($availableLetters, $index, 1);
+        }
+
+        $objectives = array_map(fn($letter) => $letter * 2 + bga_rand(1, 2), $selectedLetters);
+
+        $this->setGlobalVariable(BONUS_OBJECTIVES, $objectives);
+
+        if (!$firstRound) {
+            self::notifyAllPlayers('newObjectives', clienttranslate('Bonus objective cards have been changed'), [
+                'objectives' => $objectives,
+            ]);
+        }
     }
     
 }

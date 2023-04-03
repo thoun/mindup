@@ -69,6 +69,30 @@
             }
         }
     }
+
+    &.objective {
+        .card-sides {
+            .card-side {
+                border-radius: 8px;
+
+                &>* {
+                    pointer-events: none;
+                    user-select: none;
+                }
+
+                &.front {
+                    background-size: auto 100%;
+                    background-image: url('img/variant-cards.jpg');
+
+                    @for $number from 1 through 14 {
+                        &[data-number="#{$number}"] {
+                            background-position-x: #{($number - 1) * 100% / 13};
+                        }
+                    }
+                }
+            }
+        }  
+    }
 }
 
 /*@keyframes selectable-card-animation {

@@ -233,6 +233,7 @@ class MindUp implements MindUpGame {
             ['moveTableLine', ANIMATION_MS],
             ['delayBeforeNewRound', ANIMATION_MS],
             ['newCard', 1],
+            ['newObjectives', 1],
         ];
     
         notifs.forEach((notif) => {
@@ -286,6 +287,10 @@ class MindUp implements MindUpGame {
 
     notif_newCard(notif: Notif<NotifPlayerCardArgs>) {
         this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+    }
+
+    notif_newObjectives(notif: Notif<NotifNewObjectivesArgs>) {
+        this.tableCenter.changeObjectives(notif.args.objectives);
     }
 
     /*private getColorName(color: number) {

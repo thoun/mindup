@@ -33,10 +33,17 @@ define('END_SCORE', 100);
  * Constants
  */
 
+
+/*
+ * Options
+ */
+define('BONUS_OBJECTIVES_OPTION', 100);
+
 /*
  * Global variables
  */
 define('COSTS', 'COSTS');
+define('BONUS_OBJECTIVES', 'BONUS_OBJECTIVES');
 
 
 ?>

@@ -33,6 +33,7 @@ interface MindUpGamedatas {
     selected: Card[];
     table: Card[];
     costs: number[];
+    objectives: number[];
 }
 
 interface MindUpGame extends Game {
@@ -89,4 +90,8 @@ interface NotifPlayerCardArgs {
 interface NotifScoredCardArgs extends NotifPlayerCardArgs {
     playerScore: number;
     incScore: number;
+}
+
+interface NotifNewObjectivesArgs {
+    objectives: number[];
 }

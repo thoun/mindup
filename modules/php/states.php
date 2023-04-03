@@ -13,7 +13,7 @@ trait StateTrait {
 
     function stNewRound() {
         $this->DbQuery("UPDATE player SET `player_score_aux` = 0");
-
+        $firstRound = intval($this->getStat('roundNumber')) == 0;
         $affectedCosts = [];
         $costs = [1, 2, 3, 4, 5];
 
@@ -24,6 +24,8 @@ trait StateTrait {
         }
         $this->setGlobalVariable(COSTS, $affectedCosts);
 
+        $this->setBonusObjectives($firstRound);
+
         $playersIds = $this->getPlayersIds();
         self::notifyAllPlayers('delayBeforeNewRound', '', []);
 
@@ -31,11 +33,13 @@ trait StateTrait {
         foreach ($playersIds as $playerId) {
             $this->cards->moveAllCardsInLocation('score'.$playerId, 'hand', null, $playerId);
         }
-        self::notifyAllPlayers('newRound', clienttranslate('Scoring cards order have been changed'), [
-            'costs' => $affectedCosts,
-        ]);
+        if (!$firstRound) {
+            self::notifyAllPlayers('newRound', clienttranslate('Scoring cards order have been changed'), [
+                'costs' => $affectedCosts,
+            ]);
+        }
         
-        if ($this->getStat('roundNumber') >= 1) {
+        if ($firstRound >= 1) {
             foreach ($playersIds as $playerId) {
                 $card = new Card($this->cards->pickCard('deck', $playerId));
 
@@ -45,6 +49,14 @@ trait StateTrait {
                     'addedCardObj' => $card,
                     'preserve' => ['addedCardObj'],
                 ]);
+            }
+        }
+
+        $objectives = $this->getGlobalVariable(BONUS_OBJECTIVES, true) ?? [];
+
+        if (count($objectives) > 0) {
+            foreach ($playersIds as $playerId) {
+                $this->updatePlayerScore($playerId, $affectedCosts, $objectives);
             }
         }
 
@@ -93,6 +105,7 @@ trait StateTrait {
         self::notifyAllPlayers('delayAfterLineUnder', '', []);
 
         $costs = $this->getGlobalVariable(COSTS, true);
+        $objectives = $this->getGlobalVariable(BONUS_OBJECTIVES, true) ?? [];
 
         foreach ($tableUnder as $index => $cardUnder) {
             $cardOver = $table[$index];
@@ -101,7 +114,7 @@ trait StateTrait {
             $cardOver->locationArg = $col;
             $logCard = json_decode(json_encode($cardOver));
 
-            $playerScore = $this->updatePlayerScore($cardUnder->playerId, $costs);
+            $playerScore = $this->updatePlayerScore($cardUnder->playerId, $costs, $objectives);
 
             self::notifyAllPlayers('scoreCard', clienttranslate('${player_name} adds card ${scoredCard} to its score column ${column} and scores ${incScoreColumn} points for score card and ${incScoreCard} points for added card points'), [
                 'playerId' => $cardUnder->playerId,
@@ -131,6 +144,7 @@ trait StateTrait {
         $hands = $this->getCardsByLocation('hand');
 
         $costs = $this->getGlobalVariable(COSTS, true);
+        $objectives = $this->getGlobalVariable(BONUS_OBJECTIVES, true) ?? [];
 
         $this->incStat(1, 'playedCards');
         foreach ($hands as $card) {
@@ -140,7 +154,7 @@ trait StateTrait {
             $card->locationArg = $col;
             $logCard = json_decode(json_encode($card));
 
-            $playerScore = $this->updatePlayerScore($playerId, $costs);
+            $playerScore = $this->updatePlayerScore($playerId, $costs, $objectives);
 
             self::notifyAllPlayers('scoreCard', clienttranslate('${player_name} adds card ${scoredCard} to its score column ${column} and scores ${incScoreColumn} points for score card and ${incScoreCard} points for added card points'), [
                 'playerId' => $playerId,

@@ -485,6 +485,59 @@ body > .card {
 .card.score[data-cost="5"] {
   background-position-x: 100%;
 }
+.card.objective .card-sides .card-side {
+  border-radius: 8px;
+}
+.card.objective .card-sides .card-side > * {
+  pointer-events: none;
+  user-select: none;
+}
+.card.objective .card-sides .card-side.front {
+  background-size: auto 100%;
+  background-image: url("img/variant-cards.jpg");
+}
+.card.objective .card-sides .card-side.front[data-number="1"] {
+  background-position-x: 0%;
+}
+.card.objective .card-sides .card-side.front[data-number="2"] {
+  background-position-x: 7.6923076923%;
+}
+.card.objective .card-sides .card-side.front[data-number="3"] {
+  background-position-x: 15.3846153846%;
+}
+.card.objective .card-sides .card-side.front[data-number="4"] {
+  background-position-x: 23.0769230769%;
+}
+.card.objective .card-sides .card-side.front[data-number="5"] {
+  background-position-x: 30.7692307692%;
+}
+.card.objective .card-sides .card-side.front[data-number="6"] {
+  background-position-x: 38.4615384615%;
+}
+.card.objective .card-sides .card-side.front[data-number="7"] {
+  background-position-x: 46.1538461538%;
+}
+.card.objective .card-sides .card-side.front[data-number="8"] {
+  background-position-x: 53.8461538462%;
+}
+.card.objective .card-sides .card-side.front[data-number="9"] {
+  background-position-x: 61.5384615385%;
+}
+.card.objective .card-sides .card-side.front[data-number="10"] {
+  background-position-x: 69.2307692308%;
+}
+.card.objective .card-sides .card-side.front[data-number="11"] {
+  background-position-x: 76.9230769231%;
+}
+.card.objective .card-sides .card-side.front[data-number="12"] {
+  background-position-x: 84.6153846154%;
+}
+.card.objective .card-sides .card-side.front[data-number="13"] {
+  background-position-x: 92.3076923077%;
+}
+.card.objective .card-sides .card-side.front[data-number="14"] {
+  background-position-x: 100%;
+}
 
 /*@keyframes selectable-card-animation {
     0% { 
@@ -549,6 +602,10 @@ body > .card {
   background: rgba(255, 255, 255, 0.5333333333);
   border-radius: 8px;
   box-sizing: border-box;
+}
+#table-center #objectives {
+  background: rgba(45, 41, 102, 0.8);
+  border-radius: 8px;
 }
 
 .player-board {
@@ -742,22 +799,22 @@ html, .mode_3d #game_play_area_background {
     flex: 1;
   }
 }
-.log [data-color="1"] {
+.log [data-color="1"], .dijitTooltipContents [data-color="1"] {
   color: #f46d33;
 }
-.log [data-color="2"] {
+.log [data-color="2"], .dijitTooltipContents [data-color="2"] {
   color: #ef5c93;
 }
-.log [data-color="3"] {
+.log [data-color="3"], .dijitTooltipContents [data-color="3"] {
   color: #0079bc;
 }
-.log [data-color="4"] {
+.log [data-color="4"], .dijitTooltipContents [data-color="4"] {
   color: #6ab355;
 }
-.log [data-color="5"] {
+.log [data-color="5"], .dijitTooltipContents [data-color="5"] {
   color: #6967af;
 }
-.log .points-circle {
+.log .points-circle, .dijitTooltipContents .points-circle {
   color: white;
   border-radius: 50%;
   background: #ffbb40;
@@ -767,6 +824,6 @@ html, .mode_3d #game_play_area_background {
   text-align: center;
   font-size: 90%;
 }
-.log .points-circle[data-negative=true] {
+.log .points-circle[data-negative=true], .dijitTooltipContents .points-circle[data-negative=true] {
   background: #e94422;
 }

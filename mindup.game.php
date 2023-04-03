@@ -45,6 +45,7 @@ class MindUp extends Table {
         parent::__construct();
         
         self::initGameStateLabels([
+            BONUS_OBJECTIVES_OPTION => BONUS_OBJECTIVES_OPTION,
         ]);   
 		
         $this->cards = $this->getNew("module.common.deck");
@@ -156,6 +157,7 @@ class MindUp extends Table {
         $selected = $this->getCardsByLocation('selected');
         $result['selected'] = array_map(fn($card) => $currentPlayerId == $card->locationArg ? $card : Card::onlyId($card), $selected);
         $result['table'] = $this->getCardsByLocation('table');
+        $result['objectives'] = $this->getGlobalVariable(BONUS_OBJECTIVES, true) ?? [];
   
         return $result;
     }
