@@ -24,11 +24,11 @@ trait ActionTrait {
             throw new BgaUserException("You must choose a card in your hand");
         }
 
+        if ($this->getPlayerSelectedCard($playerId) !== null) {
+            $this->setPlayerSelectedCard($playerId, null);
+        }
+
         $this->setPlayerSelectedCard($playerId, $id);
-        $this->notifyAllPlayers('selectedCard', '', [
-            'playerId' => $playerId,
-            'selected' => true,
-        ]);
 
         $this->gamestate->setPlayerNonMultiactive($playerId, 'end');
     }
@@ -37,10 +37,6 @@ trait ActionTrait {
         $playerId = intval($this->getCurrentPlayerId());
 
         $this->setPlayerSelectedCard($playerId, null);
-        $this->notifyAllPlayers('selectedCard', '', [
-            'playerId' => $playerId,
-            'selected' => false,
-        ]);
 
         $this->gamestate->setPlayersMultiactive([$playerId], 'end', false);
     }

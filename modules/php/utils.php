@@ -81,12 +81,24 @@ trait UtilTrait {
     }
 
     function getPlayerSelectedCard(int $playerId) {
-        $val = $this->getUniqueValueFromDB("SELECT player_selected_card FROM player where `player_id` = $playerId");
-        return $val != null ? intval($val) : null;
+        $cards = $this->getCardsByLocation('selected', $playerId);
+        return $cards != null ? $cards[0] : null;
     }
 
-    function setPlayerSelectedCard(int $playerId, /*int|null*/ $selectedCard) {
-        self::DbQuery("update player set player_selected_card = ".($selectedCard !== null ? $selectedCard : 'NULL')." where `player_id` = $playerId");
+    function setPlayerSelectedCard(int $playerId, /*int|null*/ $selectedCardId) {
+        $selected = $selectedCardId !== null;
+        $card = $selected ? $this->getCardById($selectedCardId) : $this->getPlayerSelectedCard($playerId);
+        $this->cards->moveCard($card->id, $selected ? 'selected' : 'hand', $playerId);
+        $this->notifyAllPlayers('selectedCard', '', [
+            'playerId' => $playerId,
+            'card' => Card::onlyId($card),
+            'cancel' => !$selected,
+        ]);
+        $this->notifyPlayer($playerId, 'selectedCard', '', [
+            'playerId' => $playerId,
+            'card' => $card,
+            'cancel' => !$selected,
+        ]);
     }
 
     function getCardById(int $id) {
@@ -150,6 +162,25 @@ trait UtilTrait {
 
             return $maxLocationArg + 1;
         }
+    }
+
+    function updatePlayerScore(int $playerId, array $costs) {
+        $roundScore = 0;
+
+        $scoresCards = $this->getCardsByLocation('score'.$playerId);
+
+        for ($i=0; $i<5; $i++) {
+            $scoresCardsOfColor = array_values(array_filter($scoresCards, fn($card) => $card->locationArg == $i));
+            foreach ($scoresCardsOfColor as $card) {
+                $roundScore += $costs[$i] + $card->points;
+            }
+        }
+
+        // TODO apply variant cards points
+
+        $this->DbQuery("UPDATE player SET `player_score_aux` = $roundScore WHERE `player_id` = $playerId");
+
+        return $this->getPlayerScore($playerId) + $roundScore;
     }
     
 }

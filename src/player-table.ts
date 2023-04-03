@@ -39,7 +39,9 @@ class PlayerTable {
 
         if (this.currentPlayer) {
             const handDiv = document.getElementById(`player-table-${this.playerId}-hand`);
-            this.hand = new LineStock<Card>(this.game.cardsManager, handDiv);
+            this.hand = new LineStock<Card>(this.game.cardsManager, handDiv, {
+                sort: (a: Card, b: Card) => a.number - b.number,
+            });
             this.hand.onCardClick = (card: Card) => {
                 if (handDiv.classList.contains('selectable')) {
                     this.game.onHandCardClick(card);

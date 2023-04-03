@@ -135,13 +135,18 @@ class MindUp extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_score_aux scoreAux, player_no playerNo FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // Gather all information about current game situation (visible by player $current_player_id).
+
+        $isEndScore = intval($this->gamestate->state_id()) >= ST_END_SCORE;
         
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);
+            if (!$isEndScore) {
+                $player['score'] = intval($player['score']) + intval($player['scoreAux']);
+            }
 
             $player['scoresCards'] = [];
             for ($i=0; $i<5; $i++) {
@@ -150,11 +155,13 @@ class MindUp extends Table {
 
             if ($currentPlayerId == $playerId) {
                 $player['hand'] = $this->getCardsByLocation('hand', $playerId);
-                $player['selectedCard'] = $this->getPlayerSelectedCard($playerId);
             }
         }
 
         $result['costs'] = $this->getGlobalVariable(COSTS, true);
+
+        $selected = $this->getCardsByLocation('selected');
+        $result['selected'] = array_map(fn($card) => $currentPlayerId == $card->locationArg ? $card : Card::onlyId($card), $selected);
         $result['table'] = $this->getCardsByLocation('table');
   
         return $result;
@@ -213,10 +220,6 @@ class MindUp extends Table {
             $id = $playerHand[bga_rand(0, count($playerHand) - 1)]->id;
 
             $this->setPlayerSelectedCard($playerId, $id);
-            $this->notifyAllPlayers('selectedCard', '', [
-                'playerId' => $playerId,
-                'selected' => true,
-            ]);
 
             // Make sure player is in a non blocking status for role turn
             $this->gamestate->setPlayerNonMultiactive( $active_player, 'next');

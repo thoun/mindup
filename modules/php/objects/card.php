@@ -8,9 +8,9 @@ class Card {
     public int $id;
     public string $location;
     public int $locationArg;
-    public int $number;
-    public int $color;
-    public int $points;
+    public /*int|null*/ $number;
+    public /*int|null*/ $color;
+    public /*int|null*/ $points;
     public /*int|null*/ $playerId;
 
     public function __construct($dbCard) {
@@ -87,9 +87,9 @@ class Card {
         $this->id = intval($dbCard['card_id'] ?? $dbCard['id']);
         $this->location = $dbCard['card_location'] ?? $dbCard['location'];
         $this->locationArg = intval($dbCard['card_location_arg'] ?? $dbCard['location_arg']);
-        $this->number = intval($dbCard['card_type_arg'] ?? $dbCard['type_arg']);
-        $this->color = $CARD_COLORS[$this->number];
-        $this->points = $POINTS[($this->number - ($this->number >= 31 ? 0 : 1)) % 6];
+        $this->number = array_key_exists('card_type_arg', $dbCard) || array_key_exists('type_arg', $dbCard) ? intval($dbCard['card_type_arg'] ?? $dbCard['type_arg']) : null;
+        $this->color = $this->number ? $CARD_COLORS[$this->number] : null;
+        $this->points = $this->number ? $POINTS[($this->number - ($this->number >= 31 ? 0 : 1)) % 6] : null;
     } 
 
     public static function onlyId(Card $card) {
@@ -97,10 +97,6 @@ class Card {
             'card_id' => $card->id,
             'card_location' => $card->location,
             'card_location_arg' => $card->locationArg,
-            'card_type' => null,
-            'card_type_arg' => null,
-            'player_id' => null,
-            'played' => null,
         ], null);
     }
 

@@ -1,15 +1,11 @@
 class TableCenter {
+    public playerCards: SlotStock<Card>;
     public tableOver: SlotStock<Card>;
     public tableUnder: SlotStock<Card>;
 
     constructor(private game: MindUpGame, gamedatas: MindUpGamedatas) {
-        const playerCount = gamedatas.playerorder.length;
-
-        let html = `
-            <div id="table-over" class="table-line"></div>
-            <div id="table-under" class="table-line"></div>
-        `;
-        document.getElementById(`table-center`).insertAdjacentHTML('beforeend', html);
+        const playersIds = gamedatas.playerorder.map(key => Number(key));
+        const playerCount = playersIds.length;
 
         const slotSettings = {
             slotsIds: [],
@@ -19,19 +15,57 @@ class TableCenter {
             slotSettings.slotsIds.push(i);
         }
 
+        const playerCardsDiv = document.getElementById(`player-cards`);
+        this.playerCards = new SlotStock<Card>(this.game.cardsManager, playerCardsDiv, {
+            slotsIds: playersIds,
+            mapCardToSlot: card => card.locationArg,
+        });
         this.tableOver = new SlotStock<Card>(this.game.cardsManager, document.getElementById(`table-over`), slotSettings);
         this.tableUnder = new SlotStock<Card>(this.game.cardsManager, document.getElementById(`table-under`), slotSettings);
 
+        gamedatas.selected.forEach(card => this.playerCards.addCard(card, undefined, { visible: !!card.number }));
         this.tableOver.addCards(gamedatas.table);
+
+        playersIds.forEach(playerId => playerCardsDiv.querySelector(`[data-slot-id="${playerId}"]`).appendChild(this.createPlayerBlock(playerId)));
     }
     
-    public placeCardUnder(card: Card, playerId: number) {
-        this.tableUnder.addCard(card, {
-            fromElement: document.getElementById(`player-table-${playerId}`),
-        });
+    public placeCardUnder(card: Card) {
+        this.tableUnder.addCard(card);
     }
     
     public moveTableLine() {
         this.tableOver.addCards(this.tableUnder.getCards());
+    }
+
+    public createPlayerBlock(playerId: number) {
+        const player = this.game.getPlayer(playerId);
+        const block = document.createElement('div');
+        block.classList.add('player-block', 'top');
+
+        let url = (document.getElementById(`avatar_${playerId}`) as HTMLImageElement).src;
+        // ? Custom image : Bga Image
+        //url = url.replace('_32', url.indexOf('data/avatar/defaults') > 0 ? '' : '_184');
+        block.innerHTML = `
+            <div class="player-block-avatar" style="background-image: url('${url}');"></div>
+            <div class="player-block-name" style="color: #${player.color}">${player.name}</div>
+        `;
+
+        return block;
+    }
+    
+    public setPlacedCard(card: Card, currentPlayer: boolean) {
+        this.playerCards.addCard(
+            card, 
+            currentPlayer ? undefined : { fromElement: document.getElementById(`player-table-${card.locationArg}`) }, 
+            { visible: !!card.number }
+        );
+    }
+
+    public cancelPlacedCard(card: Card) {
+        this.playerCards.removeCard(card);
+    }
+    
+    public revealCards(cards: Card[]) {
+        cards.forEach(card => this.playerCards.setCardVisible(card, true));
     }
 }

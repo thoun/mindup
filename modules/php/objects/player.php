@@ -14,7 +14,6 @@ class MindUpPlayer {
         $this->color = $dbPlayer['player_color'];
         $this->no = intval($dbPlayer['player_no']);
         $this->score = intval($dbPlayer['player_score']);
-        $this->selectedCard = $dbPlayer['player_selected_card'] != null ? intval($dbPlayer['player_selected_card']) : null;
     }
 }
 ?>

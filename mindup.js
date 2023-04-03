@@ -1213,74 +1213,23 @@ var CardsManager = /** @class */ (function (_super) {
             getId: function (card) { return "card-".concat(card.id); },
             setupDiv: function (card, div) {
                 div.dataset.cardId = '' + card.id;
-                div.dataset.type = '' + card.type;
+            },
+            setupFrontDiv: function (card, div) {
                 div.dataset.color = '' + card.color;
                 div.dataset.number = '' + card.number;
             },
-            setupFrontDiv: function (card, div) {
-                if (card.type == 1) {
-                    div.innerHTML = "\n                        <div class=\"center-number\">".concat(card.number, "</div>\n                        <div class=\"corner-number left\">").concat(card.number, "</div>\n                        <div class=\"corner-number right\">").concat(card.number, "</div>\n                        <div class=\"corner-number rotated\">").concat(card.number, "</div>\n                    ");
-                }
-                else if (card.type == 0) {
-                    div.innerHTML = "\n                        <div class=\"placeholder-text\">".concat(card.number == -1 ? _("Add selected card to line") : _("Add selected card to hand"), "</div>\n                    ");
-                }
-            },
-            setupBackDiv: function (card, div) { }
         }) || this;
         _this.game = game;
         return _this;
     }
-    CardsManager.prototype.placeHelmetOnCard = function (card, playerId) {
-        /*const cardType = card.mimicType || card.type;
-
-        if (![28, 41].includes(cardType)) {
-            return;
-        }
-
-        const divId = this.getId(card);
-        const div = document.getElementById(divId).getElementsByClassName('front')[0] as HTMLDivElement;
-        if (!div) {
-            return;
-        }
-        const cardPlaced: CardPlacedTokens = div.dataset.placed ? JSON.parse(div.dataset.placed) : { tokens: []};
-        const placed: PlacedTokens[] = cardPlaced.tokens;
-
-
-        // remove tokens
-        for (let i = card.tokens; i < placed.length; i++) {
-            if (cardType === 28 && playerId) {
-                (this.game as any).slideToObjectAndDestroy(`${divId}-token${i}`, `energy-counter-${playerId}`);
-            } else {
-                (this.game as any).fadeOutAndDestroy(`${divId}-token${i}`);
-            }
-        }
-        placed.splice(card.tokens, placed.length - card.tokens);
-
-        // add tokens
-        for (let i = placed.length; i < card.tokens; i++) {
-            const newPlace = this.getPlaceOnCard(cardPlaced);
-
-            placed.push(newPlace);
-            let html = `<div id="${divId}-token${i}" style="left: ${newPlace.x - 16}px; top: ${newPlace.y - 16}px;" class="card-token `;
-            if (cardType === 28) {
-                html += `energy-cube cube-shape-${Math.floor(Math.random()*5)}`;
-            } else if (cardType === 41) {
-                html += `smoke-cloud token`;
-            }
-            html += `"></div>`;
-            div.insertAdjacentHTML('beforeend', html);
-        }
-
-        div.dataset.placed = JSON.stringify(cardPlaced);*/
-    };
     return CardsManager;
 }(CardManager));
 var TableCenter = /** @class */ (function () {
     function TableCenter(game, gamedatas) {
+        var _this = this;
         this.game = game;
-        var playerCount = gamedatas.playerorder.length;
-        var html = "\n            <div id=\"table-over\" class=\"table-line\"></div>\n            <div id=\"table-under\" class=\"table-line\"></div>\n        ";
-        document.getElementById("table-center").insertAdjacentHTML('beforeend', html);
+        var playersIds = gamedatas.playerorder.map(function (key) { return Number(key); });
+        var playerCount = playersIds.length;
         var slotSettings = {
             slotsIds: [],
             mapCardToSlot: function (card) { return card.locationArg; },
@@ -1288,17 +1237,42 @@ var TableCenter = /** @class */ (function () {
         for (var i = 0; i < playerCount; i++) {
             slotSettings.slotsIds.push(i);
         }
+        var playerCardsDiv = document.getElementById("player-cards");
+        this.playerCards = new SlotStock(this.game.cardsManager, playerCardsDiv, {
+            slotsIds: playersIds,
+            mapCardToSlot: function (card) { return card.locationArg; },
+        });
         this.tableOver = new SlotStock(this.game.cardsManager, document.getElementById("table-over"), slotSettings);
         this.tableUnder = new SlotStock(this.game.cardsManager, document.getElementById("table-under"), slotSettings);
+        gamedatas.selected.forEach(function (card) { return _this.playerCards.addCard(card, undefined, { visible: !!card.number }); });
         this.tableOver.addCards(gamedatas.table);
+        playersIds.forEach(function (playerId) { return playerCardsDiv.querySelector("[data-slot-id=\"".concat(playerId, "\"]")).appendChild(_this.createPlayerBlock(playerId)); });
     }
-    TableCenter.prototype.placeCardUnder = function (card, playerId) {
-        this.tableUnder.addCard(card, {
-            fromElement: document.getElementById("player-table-".concat(playerId)),
-        });
+    TableCenter.prototype.placeCardUnder = function (card) {
+        this.tableUnder.addCard(card);
     };
     TableCenter.prototype.moveTableLine = function () {
         this.tableOver.addCards(this.tableUnder.getCards());
+    };
+    TableCenter.prototype.createPlayerBlock = function (playerId) {
+        var player = this.game.getPlayer(playerId);
+        var block = document.createElement('div');
+        block.classList.add('player-block', 'top');
+        var url = document.getElementById("avatar_".concat(playerId)).src;
+        // ? Custom image : Bga Image
+        //url = url.replace('_32', url.indexOf('data/avatar/defaults') > 0 ? '' : '_184');
+        block.innerHTML = "\n            <div class=\"player-block-avatar\" style=\"background-image: url('".concat(url, "');\"></div>\n            <div class=\"player-block-name\" style=\"color: #").concat(player.color, "\">").concat(player.name, "</div>\n        ");
+        return block;
+    };
+    TableCenter.prototype.setPlacedCard = function (card, currentPlayer) {
+        this.playerCards.addCard(card, currentPlayer ? undefined : { fromElement: document.getElementById("player-table-".concat(card.locationArg)) }, { visible: !!card.number });
+    };
+    TableCenter.prototype.cancelPlacedCard = function (card) {
+        this.playerCards.removeCard(card);
+    };
+    TableCenter.prototype.revealCards = function (cards) {
+        var _this = this;
+        cards.forEach(function (card) { return _this.playerCards.setCardVisible(card, true); });
     };
     return TableCenter;
 }());
@@ -1324,7 +1298,9 @@ var PlayerTable = /** @class */ (function () {
         dojo.place(html, document.getElementById('tables'));
         if (this.currentPlayer) {
             var handDiv_1 = document.getElementById("player-table-".concat(this.playerId, "-hand"));
-            this.hand = new LineStock(this.game.cardsManager, handDiv_1);
+            this.hand = new LineStock(this.game.cardsManager, handDiv_1, {
+                sort: function (a, b) { return a.number - b.number; },
+            });
             this.hand.onCardClick = function (card) {
                 if (handDiv_1.classList.contains('selectable')) {
                     _this.game.onHandCardClick(card);
@@ -1444,9 +1420,6 @@ var MindUp = /** @class */ (function () {
     MindUp.prototype.getPlayerId = function () {
         return Number(this.player_id);
     };
-    MindUp.prototype.getPlayerColor = function (playerId) {
-        return this.gamedatas.players[playerId].color;
-    };
     MindUp.prototype.getPlayer = function (playerId) {
         return Object.values(this.gamedatas.players).find(function (player) { return Number(player.id) == playerId; });
     };
@@ -1492,13 +1465,9 @@ var MindUp = /** @class */ (function () {
         var table = new PlayerTable(this, gamedatas.players[playerId], gamedatas.costs);
         this.playersTables.push(table);
     };
-    MindUp.prototype.incScore = function (playerId, inc) {
+    MindUp.prototype.setScore = function (playerId, score) {
         var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(inc);
-    };
-    MindUp.prototype.incScored = function (playerId, inc) {
-        this.scoredCounters[playerId].incValue(inc);
-        this.incScore(playerId, inc);
+        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(score);
     };
     MindUp.prototype.onHandCardClick = function (card) {
         this.chooseCard(card.id);
@@ -1539,8 +1508,10 @@ var MindUp = /** @class */ (function () {
         var notifs = [
             ['newRound', 1],
             ['selectedCard', 1],
+            ['delayBeforeReveal', ANIMATION_MS],
+            ['revealCards', ANIMATION_MS * 2],
             ['placeCardUnder', ANIMATION_MS],
-            ['scoreCard', ANIMATION_MS],
+            ['scoreCard', ANIMATION_MS * 2],
             ['moveTableLine', ANIMATION_MS],
         ];
         notifs.forEach(function (notif) {
@@ -1552,42 +1523,62 @@ var MindUp = /** @class */ (function () {
         this.playersTables.forEach(function (table) { return table.setCosts(notif.args.costs); });
     };
     MindUp.prototype.notif_selectedCard = function (notif) {
-        console.log(notif.args);
+        var currentPlayer = this.getPlayerId() == notif.args.playerId;
+        if (notif.args.card.number || !currentPlayer) {
+            if (notif.args.cancel) {
+                if (currentPlayer) {
+                    this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+                }
+                else {
+                    this.tableCenter.cancelPlacedCard(notif.args.card);
+                }
+            }
+            else {
+                this.tableCenter.setPlacedCard(notif.args.card, currentPlayer);
+            }
+        }
+    };
+    MindUp.prototype.notif_delayBeforeReveal = function () { };
+    MindUp.prototype.notif_revealCards = function (notif) {
+        this.tableCenter.revealCards(notif.args.cards);
     };
     MindUp.prototype.notif_placeCardUnder = function (notif) {
-        this.tableCenter.placeCardUnder(notif.args.card, notif.args.playerId);
+        this.tableCenter.placeCardUnder(notif.args.card);
     };
     MindUp.prototype.notif_scoreCard = function (notif) {
         this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
+        this.setScore(notif.args.playerId, notif.args.playerScore);
     };
     MindUp.prototype.notif_moveTableLine = function () {
         this.tableCenter.moveTableLine();
     };
-    /*notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
-        this.incScored(notif.args.playerId, Number(notif.args.count));
-        this.tableCenter.setJackpot(notif.args.color, 0);
-        notif.args.lineColorCard.forEach(card => this.cardsManager.getCardElement(card).classList.add('jackpot-animation'));
-    }
-
-    notif_betResult(notif: Notif<NotifBetResultArgs>) {
-        this.addBetToken(notif.args.playerId, notif.args.value);
-        this.incScore(notif.args.playerId, Number(notif.args.value));
-    }
-
-    notif_closeLine(notif: Notif<NotifApplyJackpotArgs>) {
-        this.getPlayerTable(notif.args.playerId).line.removeAll();
-        this.incScored(notif.args.playerId, Number(notif.args.count));
+    /*private getColorName(color: number) {
+        switch (color) {
+            case 1: return _('Orange');
+            case 2: return _('Pink');
+            case 3: return _('Blue');
+            case 4: return _('Green');
+            case 5: return _('Purple');
+        }
     }*/
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     MindUp.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                if (args.cardValue == '' && args.card) {
-                    args.cardValue = "<strong data-color=\"".concat(args.card.color, "\">").concat(args.card.type == 2 && args.card.number > 0 ? '+' : '').concat(args.card.number, "</strong>");
-                }
-                if (typeof args.colorName == 'string' && args.colorName[0] !== '<' && args.color) {
-                    args.colorName = "<div class=\"jackpot-icon\" data-color=\"".concat(args.color, "\"></div>");
+                ['scoredCard', 'cardOver', 'cardUnder'].forEach(function (attr) {
+                    if ((typeof args[attr] !== 'string' || args[attr][0] !== '<') && args[attr + 'Obj']) {
+                        var obj = args[attr + 'Obj'];
+                        args[attr] = "<strong data-color=\"".concat(obj.color, "\">").concat(obj.number, "</strong>");
+                        if (obj.points != 0) {
+                            args[attr] += " <div class=\"points-circle\" data-negative=\"".concat((obj.points < 0).toString(), "\">").concat(obj.points > 0 ? '+' : '').concat(obj.points, "</div>");
+                        }
+                    }
+                });
+                for (var property in args) {
+                    if (['column', 'incScoreColumn', 'incScoreCard'].includes(property) && args[property][0] != '<') {
+                        args[property] = "<strong>".concat(_(args[property]), "</strong>");
+                    }
                 }
             }
         }

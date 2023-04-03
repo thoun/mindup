@@ -121,11 +121,7 @@ class MindUp implements MindUpGame {
         return Number((this as any).player_id);
     }
 
-    public getPlayerColor(playerId: number): string {
-        return this.gamedatas.players[playerId].color;
-    }
-
-    private getPlayer(playerId: number): MindUpPlayer {
+    public getPlayer(playerId: number): MindUpPlayer {
         return Object.values(this.gamedatas.players).find(player => Number(player.id) == playerId);
     }
 
@@ -179,13 +175,8 @@ class MindUp implements MindUpGame {
         this.playersTables.push(table);
     }
 
-    private incScore(playerId: number, inc: number) {
-        (this as any).scoreCtrl[playerId]?.incValue(inc);
-    }
-
-    private incScored(playerId: number, inc: number) {
-        this.scoredCounters[playerId].incValue(inc);
-        this.incScore(playerId, inc);
+    private setScore(playerId: number, score: number) {
+        (this as any).scoreCtrl[playerId]?.toValue(score);
     }
 
     public onHandCardClick(card: Card): void {
@@ -234,8 +225,10 @@ class MindUp implements MindUpGame {
         const notifs = [
             ['newRound', 1],
             ['selectedCard', 1],
+            ['delayBeforeReveal', ANIMATION_MS],
+            ['revealCards', ANIMATION_MS * 2],
             ['placeCardUnder', ANIMATION_MS],
-            ['scoreCard', ANIMATION_MS],
+            ['scoreCard', ANIMATION_MS * 2],
             ['moveTableLine', ANIMATION_MS],
         ];
     
@@ -250,48 +243,70 @@ class MindUp implements MindUpGame {
     }
 
     notif_selectedCard(notif: Notif<NotifSelectedCardArgs>) {
-        console.log(notif.args);
+        const currentPlayer = this.getPlayerId() == notif.args.playerId;
+        if (notif.args.card.number || !currentPlayer) {
+            if (notif.args.cancel) {
+                if (currentPlayer) {
+                    this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+                } else {
+                    this.tableCenter.cancelPlacedCard(notif.args.card);
+                }
+            } else {
+                this.tableCenter.setPlacedCard(notif.args.card, currentPlayer);
+            }
+        }
+    }
+
+    notif_delayBeforeReveal() {}
+
+    notif_revealCards(notif: Notif<NotifRevealCardsArgs>) {
+        this.tableCenter.revealCards(notif.args.cards);
     }
 
     notif_placeCardUnder(notif: Notif<NotifPlayerCardArgs>) {
-        this.tableCenter.placeCardUnder(notif.args.card, notif.args.playerId);
+        this.tableCenter.placeCardUnder(notif.args.card);
     }
 
-    notif_scoreCard(notif: Notif<NotifPlayerCardArgs>) {
+    notif_scoreCard(notif: Notif<NotifScoredCardArgs>) {
         this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
+
+        this.setScore(notif.args.playerId, notif.args.playerScore);
     }
 
     notif_moveTableLine() {
         this.tableCenter.moveTableLine();
     }
 
-    /*notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
-        this.incScored(notif.args.playerId, Number(notif.args.count));
-        this.tableCenter.setJackpot(notif.args.color, 0);
-        notif.args.lineColorCard.forEach(card => this.cardsManager.getCardElement(card).classList.add('jackpot-animation'));
-    }
-
-    notif_betResult(notif: Notif<NotifBetResultArgs>) {
-        this.addBetToken(notif.args.playerId, notif.args.value);
-        this.incScore(notif.args.playerId, Number(notif.args.value));
-    }
-
-    notif_closeLine(notif: Notif<NotifApplyJackpotArgs>) {
-        this.getPlayerTable(notif.args.playerId).line.removeAll();
-        this.incScored(notif.args.playerId, Number(notif.args.count));
+    /*private getColorName(color: number) {
+        switch (color) {
+            case 1: return _('Orange');
+            case 2: return _('Pink');
+            case 3: return _('Blue');
+            case 4: return _('Green');
+            case 5: return _('Purple');
+        }
     }*/
-
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                if (args.cardValue == '' && args.card) {
-                    args.cardValue = `<strong data-color="${args.card.color}">${args.card.type == 2 && args.card.number > 0 ? '+' : ''}${args.card.number}</strong>`;
-                }
-                if (typeof args.colorName == 'string' && args.colorName[0] !== '<' && args.color) {
-                    args.colorName = `<div class="jackpot-icon" data-color="${args.color}"></div>`;
+
+                ['scoredCard', 'cardOver', 'cardUnder'].forEach(attr => {
+                    if ((typeof args[attr] !== 'string' || args[attr][0] !== '<') && args[attr + 'Obj']) {
+                        const obj: Card = args[attr + 'Obj'];
+                        args[attr] = `<strong data-color="${obj.color}">${obj.number}</strong>`;
+                        if (obj.points != 0) {
+                            args[attr] += ` <div class="points-circle" data-negative="${(obj.points < 0).toString()}">${obj.points > 0 ? '+' : ''}${obj.points}</div>`;
+                        }
+                    }
+                });
+
+                for (const property in args) {
+                    if (['column', 'incScoreColumn', 'incScoreCard'].includes(property) && args[property][0] != '<') {
+                        args[property] = `<strong>${_(args[property])}</strong>`;
+                    }
                 }
             }
         } catch (e) {

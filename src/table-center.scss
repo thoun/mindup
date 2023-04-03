@@ -14,9 +14,56 @@
         .card {
             margin: 0;
         }
+
+        .player-block {
+            position: absolute;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 0 2px 2px #00000088;
+            z-index: 1;
+
+            &.top {
+                top: -32px;
+            }
+
+            .player-block-avatar {
+                min-width: 32px;
+                width: 32px;
+                height: 32px;
+                background-color: #fff;
+                outline: 1px solid #6a6a6a;
+                border-radius: 50%;
+                // box-shadow: 0 1px 3px #000, inset 0 2px 3px rgba(0,0,0,.4);
+            }
+            
+            .player-block-name {
+                font-weight: bold;
+                flex: 1;
+                font-size: 11pt;
+                word-break: break-word;
+            }
+        }
     }
 
-    .table-under {
-        margin-top: 8px;
+    .card-line:not(:last-child) {
+        margin-bottom: 8px;
+    }
+
+    .label-top {
+        margin-top: 32px;
+    }
+
+    #player-cards {
+        .slot {
+            border: 1px dashed white;
+            background: #FFFFFF88;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
     }
 }

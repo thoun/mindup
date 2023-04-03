@@ -20,7 +20,7 @@
                 user-select: none;
             }
 
-            &.front {  
+            &.back {  
                 background-size: auto 100%;
                 background-image: url('img/card-back.jpg');
             }
@@ -32,7 +32,7 @@
         }
     }    
 
-    &.selectable:not(.disabled) {
+    /*&.selectable:not(.disabled) {
         cursor: pointer;
         &:not(.selected) {
             animation: selectable-card-animation 1s alternate infinite ease-in-out;
@@ -49,11 +49,11 @@
         .card-side {
             box-shadow: unset;
         }
-    } 
+    } */
 
     @for $line from 0 through 5 {
         @for $col from 1 through 10 {
-            &[data-number="#{$line * 10 + $col}"] .front {
+            .front[data-number="#{$line * 10 + $col}"] {
                 background-position: #{($col - 1) * 100% / 9} #{$line * 100% / 5};
             }
         }
@@ -71,7 +71,7 @@
     }
 }
 
-@keyframes selectable-card-animation {
+/*@keyframes selectable-card-animation {
     0% { 
       //background: var(--background-lighter);
       box-shadow: 0 0 3px 2px #FFFFFF;
@@ -80,4 +80,4 @@
       //background: var(--background-darker);
       box-shadow: 0 0 5px 3px #FFFFFF;
     }
-}
+}*/

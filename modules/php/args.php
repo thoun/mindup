@@ -13,7 +13,7 @@ trait ArgsTrait {
     */
    
     function argChooseCard() {
-        $playersIds = $this->getPlayersIds();
+        /*$playersIds = $this->getPlayersIds();
         
         $private = [];
 
@@ -25,6 +25,6 @@ trait ArgsTrait {
 
         return [
             '_private' => $private,
-        ];
+        ];*/
     }
 } 

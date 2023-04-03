@@ -248,6 +248,24 @@ body > .card {
   height: 152px;
   margin: 5px;
   border-radius: 8px;
+  /*&.selectable:not(.disabled) {
+      cursor: pointer;
+      &:not(.selected) {
+          animation: selectable-card-animation 1s alternate infinite ease-in-out;
+      }
+
+      .card-side {
+          box-shadow: unset;
+      }
+  }    
+
+  &.selected:not(.disabled) {
+      box-shadow: 0 0 5px 8px #e273f5;
+
+      .card-side {
+          box-shadow: unset;
+      }
+  } */
 }
 .card.disabled {
   cursor: not-allowed;
@@ -260,7 +278,7 @@ body > .card {
   pointer-events: none;
   user-select: none;
 }
-.card .card-sides .card-side.front {
+.card .card-sides .card-side.back {
   background-size: auto 100%;
   background-image: url("img/card-back.jpg");
 }
@@ -268,199 +286,184 @@ body > .card {
   background-size: auto 600%;
   background-image: url("img/cards.jpg");
 }
-.card.selectable:not(.disabled) {
-  cursor: pointer;
-}
-.card.selectable:not(.disabled):not(.selected) {
-  animation: selectable-card-animation 1s alternate infinite ease-in-out;
-}
-.card.selectable:not(.disabled) .card-side {
-  box-shadow: unset;
-}
-.card.selected:not(.disabled) {
-  box-shadow: 0 0 5px 8px #e273f5;
-}
-.card.selected:not(.disabled) .card-side {
-  box-shadow: unset;
-}
-.card[data-number="1"] .front {
+.card .front[data-number="1"] {
   background-position: 0% 0%;
 }
-.card[data-number="2"] .front {
+.card .front[data-number="2"] {
   background-position: 11.1111111111% 0%;
 }
-.card[data-number="3"] .front {
+.card .front[data-number="3"] {
   background-position: 22.2222222222% 0%;
 }
-.card[data-number="4"] .front {
+.card .front[data-number="4"] {
   background-position: 33.3333333333% 0%;
 }
-.card[data-number="5"] .front {
+.card .front[data-number="5"] {
   background-position: 44.4444444444% 0%;
 }
-.card[data-number="6"] .front {
+.card .front[data-number="6"] {
   background-position: 55.5555555556% 0%;
 }
-.card[data-number="7"] .front {
+.card .front[data-number="7"] {
   background-position: 66.6666666667% 0%;
 }
-.card[data-number="8"] .front {
+.card .front[data-number="8"] {
   background-position: 77.7777777778% 0%;
 }
-.card[data-number="9"] .front {
+.card .front[data-number="9"] {
   background-position: 88.8888888889% 0%;
 }
-.card[data-number="10"] .front {
+.card .front[data-number="10"] {
   background-position: 100% 0%;
 }
-.card[data-number="11"] .front {
+.card .front[data-number="11"] {
   background-position: 0% 20%;
 }
-.card[data-number="12"] .front {
+.card .front[data-number="12"] {
   background-position: 11.1111111111% 20%;
 }
-.card[data-number="13"] .front {
+.card .front[data-number="13"] {
   background-position: 22.2222222222% 20%;
 }
-.card[data-number="14"] .front {
+.card .front[data-number="14"] {
   background-position: 33.3333333333% 20%;
 }
-.card[data-number="15"] .front {
+.card .front[data-number="15"] {
   background-position: 44.4444444444% 20%;
 }
-.card[data-number="16"] .front {
+.card .front[data-number="16"] {
   background-position: 55.5555555556% 20%;
 }
-.card[data-number="17"] .front {
+.card .front[data-number="17"] {
   background-position: 66.6666666667% 20%;
 }
-.card[data-number="18"] .front {
+.card .front[data-number="18"] {
   background-position: 77.7777777778% 20%;
 }
-.card[data-number="19"] .front {
+.card .front[data-number="19"] {
   background-position: 88.8888888889% 20%;
 }
-.card[data-number="20"] .front {
+.card .front[data-number="20"] {
   background-position: 100% 20%;
 }
-.card[data-number="21"] .front {
+.card .front[data-number="21"] {
   background-position: 0% 40%;
 }
-.card[data-number="22"] .front {
+.card .front[data-number="22"] {
   background-position: 11.1111111111% 40%;
 }
-.card[data-number="23"] .front {
+.card .front[data-number="23"] {
   background-position: 22.2222222222% 40%;
 }
-.card[data-number="24"] .front {
+.card .front[data-number="24"] {
   background-position: 33.3333333333% 40%;
 }
-.card[data-number="25"] .front {
+.card .front[data-number="25"] {
   background-position: 44.4444444444% 40%;
 }
-.card[data-number="26"] .front {
+.card .front[data-number="26"] {
   background-position: 55.5555555556% 40%;
 }
-.card[data-number="27"] .front {
+.card .front[data-number="27"] {
   background-position: 66.6666666667% 40%;
 }
-.card[data-number="28"] .front {
+.card .front[data-number="28"] {
   background-position: 77.7777777778% 40%;
 }
-.card[data-number="29"] .front {
+.card .front[data-number="29"] {
   background-position: 88.8888888889% 40%;
 }
-.card[data-number="30"] .front {
+.card .front[data-number="30"] {
   background-position: 100% 40%;
 }
-.card[data-number="31"] .front {
+.card .front[data-number="31"] {
   background-position: 0% 60%;
 }
-.card[data-number="32"] .front {
+.card .front[data-number="32"] {
   background-position: 11.1111111111% 60%;
 }
-.card[data-number="33"] .front {
+.card .front[data-number="33"] {
   background-position: 22.2222222222% 60%;
 }
-.card[data-number="34"] .front {
+.card .front[data-number="34"] {
   background-position: 33.3333333333% 60%;
 }
-.card[data-number="35"] .front {
+.card .front[data-number="35"] {
   background-position: 44.4444444444% 60%;
 }
-.card[data-number="36"] .front {
+.card .front[data-number="36"] {
   background-position: 55.5555555556% 60%;
 }
-.card[data-number="37"] .front {
+.card .front[data-number="37"] {
   background-position: 66.6666666667% 60%;
 }
-.card[data-number="38"] .front {
+.card .front[data-number="38"] {
   background-position: 77.7777777778% 60%;
 }
-.card[data-number="39"] .front {
+.card .front[data-number="39"] {
   background-position: 88.8888888889% 60%;
 }
-.card[data-number="40"] .front {
+.card .front[data-number="40"] {
   background-position: 100% 60%;
 }
-.card[data-number="41"] .front {
+.card .front[data-number="41"] {
   background-position: 0% 80%;
 }
-.card[data-number="42"] .front {
+.card .front[data-number="42"] {
   background-position: 11.1111111111% 80%;
 }
-.card[data-number="43"] .front {
+.card .front[data-number="43"] {
   background-position: 22.2222222222% 80%;
 }
-.card[data-number="44"] .front {
+.card .front[data-number="44"] {
   background-position: 33.3333333333% 80%;
 }
-.card[data-number="45"] .front {
+.card .front[data-number="45"] {
   background-position: 44.4444444444% 80%;
 }
-.card[data-number="46"] .front {
+.card .front[data-number="46"] {
   background-position: 55.5555555556% 80%;
 }
-.card[data-number="47"] .front {
+.card .front[data-number="47"] {
   background-position: 66.6666666667% 80%;
 }
-.card[data-number="48"] .front {
+.card .front[data-number="48"] {
   background-position: 77.7777777778% 80%;
 }
-.card[data-number="49"] .front {
+.card .front[data-number="49"] {
   background-position: 88.8888888889% 80%;
 }
-.card[data-number="50"] .front {
+.card .front[data-number="50"] {
   background-position: 100% 80%;
 }
-.card[data-number="51"] .front {
+.card .front[data-number="51"] {
   background-position: 0% 100%;
 }
-.card[data-number="52"] .front {
+.card .front[data-number="52"] {
   background-position: 11.1111111111% 100%;
 }
-.card[data-number="53"] .front {
+.card .front[data-number="53"] {
   background-position: 22.2222222222% 100%;
 }
-.card[data-number="54"] .front {
+.card .front[data-number="54"] {
   background-position: 33.3333333333% 100%;
 }
-.card[data-number="55"] .front {
+.card .front[data-number="55"] {
   background-position: 44.4444444444% 100%;
 }
-.card[data-number="56"] .front {
+.card .front[data-number="56"] {
   background-position: 55.5555555556% 100%;
 }
-.card[data-number="57"] .front {
+.card .front[data-number="57"] {
   background-position: 66.6666666667% 100%;
 }
-.card[data-number="58"] .front {
+.card .front[data-number="58"] {
   background-position: 77.7777777778% 100%;
 }
-.card[data-number="59"] .front {
+.card .front[data-number="59"] {
   background-position: 88.8888888889% 100%;
 }
-.card[data-number="60"] .front {
+.card .front[data-number="60"] {
   background-position: 100% 100%;
 }
 .card.score {
@@ -483,14 +486,16 @@ body > .card {
   background-position-x: 100%;
 }
 
-@keyframes selectable-card-animation {
-  0% {
-    box-shadow: 0 0 3px 2px #FFFFFF;
-  }
-  100% {
-    box-shadow: 0 0 5px 3px #FFFFFF;
-  }
-}
+/*@keyframes selectable-card-animation {
+    0% { 
+      //background: var(--background-lighter);
+      box-shadow: 0 0 3px 2px #FFFFFF;
+    }
+    100% { 
+      //background: var(--background-darker);
+      box-shadow: 0 0 5px 3px #FFFFFF;
+    }
+}*/
 #table-center {
   border: 2px solid #ffd752;
   padding: 5px;
@@ -506,8 +511,46 @@ body > .card {
 #table-center .slot .card {
   margin: 0;
 }
-#table-center .table-under {
-  margin-top: 8px;
+#table-center .slot .player-block {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.5333333333);
+  z-index: 1;
+}
+#table-center .slot .player-block.top {
+  top: -32px;
+}
+#table-center .slot .player-block .player-block-avatar {
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  background-color: #fff;
+  outline: 1px solid #6a6a6a;
+  border-radius: 50%;
+}
+#table-center .slot .player-block .player-block-name {
+  font-weight: bold;
+  flex: 1;
+  font-size: 11pt;
+  word-break: break-word;
+}
+#table-center .card-line:not(:last-child) {
+  margin-bottom: 8px;
+}
+#table-center .label-top {
+  margin-top: 32px;
+}
+#table-center #player-cards .slot {
+  border: 1px dashed white;
+  background: rgba(255, 255, 255, 0.5333333333);
+  border-radius: 8px;
+  box-sizing: border-box;
 }
 
 .player-board {
@@ -641,7 +684,7 @@ body > .card {
 }
 html, .mode_3d #game_play_area_background {
   background: url("img/background.jpg");
-  background-position: top center;
+  background-size: 100% auto;
   background-repeat: repeat;
 }
 
@@ -701,58 +744,31 @@ html, .mode_3d #game_play_area_background {
     flex: 1;
   }
 }
-.player-hand-card {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-  background-image: url("img/hand.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-}
-
-.player-line-card {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-  background-image: url("img/card-line.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-}
-
 .log [data-color="1"] {
-  color: #ED1B24;
+  color: #f46d33;
 }
 .log [data-color="2"] {
-  color: #009BDE;
+  color: #ef5c93;
 }
 .log [data-color="3"] {
-  color: #3AB54A;
+  color: #0079bc;
 }
 .log [data-color="4"] {
-  color: #FFC30D;
-  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;
+  color: #6ab355;
 }
-.log .jackpot-icon {
-  width: 24px;
-  height: 24px;
+.log [data-color="5"] {
+  color: #6967af;
+}
+.log .points-circle {
+  color: white;
+  border-radius: 50%;
+  background: #ffbb40;
   display: inline-block;
-  vertical-align: middle;
-  background-size: auto 100%;
-  background-image: url("img/jackpot-icons.png");
+  height: 16px;
+  width: 16px;
+  text-align: center;
+  font-size: 90%;
 }
-.log .jackpot-icon[data-color="1"] {
-  background-position-x: 0%;
-}
-.log .jackpot-icon[data-color="2"] {
-  background-position-x: 33.3333333333%;
-}
-.log .jackpot-icon[data-color="3"] {
-  background-position-x: 66.6666666667%;
-}
-.log .jackpot-icon[data-color="4"] {
-  background-position-x: 100%;
+.log .points-circle[data-negative=true] {
+  background: #e94422;
 }

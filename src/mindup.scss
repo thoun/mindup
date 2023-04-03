@@ -15,7 +15,7 @@
 
 html, .mode_3d #game_play_area_background {
   background: url('img/background.jpg');
-  background-position: top center;
+  background-size: 100% auto;
   background-repeat: repeat;
 }
 
@@ -83,58 +83,35 @@ html, .mode_3d #game_play_area_background {
   }
 }
 
-.player-hand-card {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-  background-image: url('img/hand.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-}
-
-.player-line-card {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-  background-image: url('img/card-line.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-}
-
 .log {
   [data-color="1"] {
-    color: #ED1B24;
+    color: #f46d33;
   }
   [data-color="2"] {
-    color: #009BDE;
+    color: #ef5c93;
   }
   [data-color="3"] {
-    color: #3AB54A;
+    color: #0079bc;
   }
   [data-color="4"] {
-    color: #FFC30D;
-    text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;
+    color: #6ab355;
+  }
+  [data-color="5"] {
+    color: #6967af;
   }
 
-  
-
-  .jackpot-icon {
-    width: 24px;
-    height: 24px;
+  .points-circle {
+    color: white;
+    border-radius: 50%;
+    background: #ffbb40;
     display: inline-block;
-    vertical-align: middle;
-    background-size: auto 100%;
-    background-image: url('img/jackpot-icons.png');
+    height: 16px;
+    width: 16px;
+    text-align: center;
+    font-size: 90%;
 
-    @for $color from 1 through 4 {
-        &[data-color="#{$color}"] {
-            background-position-x: #{($color - 1) * 100% / 3};
-        }
+    &[data-negative="true"] {
+      background: #e94422;
     }
   }
-
 }
