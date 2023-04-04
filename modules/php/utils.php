@@ -261,6 +261,13 @@ trait UtilTrait {
 
         return $this->getPlayerScore($playerId) + $roundScore;
     }
+    
+    function updateStats(int $playerId, int $cardPoints, int $scoreCardPoints) {
+        $this->incStat($cardPoints, 'cardPoints');
+        $this->incStat($cardPoints, 'cardPoints', $playerId);
+        $this->incStat($scoreCardPoints, 'scoreCardPoints');
+        $this->incStat($scoreCardPoints, 'scoreCardPoints', $playerId);
+    }
 
     function getBonusObjectivesNumber() {
         return intval($this->getGameStateValue(BONUS_OBJECTIVES_OPTION));

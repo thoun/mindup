@@ -53,6 +53,16 @@ $commonStats = [
         "name" => totranslate("Played cards"),
         "type" => "int"
     ],
+    "cardPoints" => [
+        "id" => 20,
+        "name" => totranslate("Points from card bonus/malus"),
+        "type" => "int"
+    ],
+    "scoreCardPoints" => [
+        "id" => 21,
+        "name" => totranslate("Points from scoring cards"),
+        "type" => "int"
+    ],
 ];
 
 $stats_type = [

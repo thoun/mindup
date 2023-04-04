@@ -115,6 +115,7 @@ trait StateTrait {
             $logCard = json_decode(json_encode($cardOver));
 
             $playerScore = $this->updatePlayerScore($cardUnder->playerId, $costs, $objectives);
+            $this->updateStats($cardUnder->playerId, $cardOver->points, $costs[$col]);
 
             self::notifyAllPlayers('scoreCard', clienttranslate('${player_name} adds card ${scoredCard} to its score column ${column} and scores ${incScoreColumn} points for score card and ${incScoreCard} points for added card points'), [
                 'playerId' => $cardUnder->playerId,
@@ -155,6 +156,7 @@ trait StateTrait {
             $logCard = json_decode(json_encode($card));
 
             $playerScore = $this->updatePlayerScore($playerId, $costs, $objectives);
+            $this->updateStats($playerId, $card->points, $costs[$col]);
 
             self::notifyAllPlayers('scoreCard', clienttranslate('${player_name} adds card ${scoredCard} to its score column ${column} and scores ${incScoreColumn} points for score card and ${incScoreCard} points for added card points'), [
                 'playerId' => $playerId,

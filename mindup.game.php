@@ -95,6 +95,7 @@ class MindUp extends Table {
         foreach(['table', 'player'] as $type) {
             foreach([
                 "playedCards",
+                "cardPoints", "scoreCardPoints",
             ] as $name) {
                 $this->initStat($type, $name, 0);
             }
