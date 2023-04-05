@@ -281,7 +281,8 @@ trait UtilTrait {
         }
 
         $selectedLetters = [];
-        $availableLetters = [0, 1, 2, 3, 4, 5, 6];
+        $usedLetters = $this->getGlobalVariable(USED_LETTERS, true) ?? [];
+        $availableLetters = array_values(array_filter([0, 1, 2, 3, 4, 5, 6], fn($letter) => !in_array($letter, $usedLetters)));
 
         for ($i = 0; $i < $number; $i++) {
             $index = bga_rand(1, count($availableLetters)) - 1;
@@ -292,6 +293,8 @@ trait UtilTrait {
         $objectives = array_map(fn($letter) => $letter * 2 + bga_rand(1, 2), $selectedLetters);
 
         $this->setGlobalVariable(BONUS_OBJECTIVES, $objectives);
+        $usedLetters = array_merge($usedLetters, $selectedLetters);
+        $this->setGlobalVariable(USED_LETTERS, $usedLetters);
 
         if (!$firstRound) {
             self::notifyAllPlayers('newObjectives', clienttranslate('Bonus objective cards have been changed'), [

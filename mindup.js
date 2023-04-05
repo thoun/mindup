@@ -1228,7 +1228,7 @@ var ObjectivesManager = /** @class */ (function (_super) {
     __extends(ObjectivesManager, _super);
     function ObjectivesManager(game) {
         var _this = _super.call(this, game, {
-            getId: function (card) { return "card-".concat(card); },
+            getId: function (card) { return "objective-".concat(card); },
             setupDiv: function (card, div) {
                 div.classList.add('objective');
                 game.setTooltip(div.id, _this.getTooltip(card));

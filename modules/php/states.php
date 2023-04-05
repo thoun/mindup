@@ -37,9 +37,7 @@ trait StateTrait {
             self::notifyAllPlayers('newRound', clienttranslate('Scoring cards order have been changed'), [
                 'costs' => $affectedCosts,
             ]);
-        }
-        
-        if ($firstRound >= 1) {
+            
             foreach ($playersIds as $playerId) {
                 $card = new Card($this->cards->pickCard('deck', $playerId));
 

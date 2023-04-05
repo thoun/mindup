@@ -44,6 +44,7 @@ define('BONUS_OBJECTIVES_OPTION', 100);
  */
 define('COSTS', 'COSTS');
 define('BONUS_OBJECTIVES', 'BONUS_OBJECTIVES');
+define('USED_LETTERS', 'USED_LETTERS');
 
 
 ?>

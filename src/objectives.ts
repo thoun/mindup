@@ -1,7 +1,7 @@
 class ObjectivesManager extends CardManager<number> {
     constructor (public game: MindUpGame) {
         super(game, {
-            getId: (card) => `card-${card}`,
+            getId: (card) => `objective-${card}`,
             setupDiv: (card: number, div: HTMLElement) => { 
                 div.classList.add('objective');
                 game.setTooltip(div.id, this.getTooltip(card));
