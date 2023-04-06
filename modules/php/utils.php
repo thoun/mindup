@@ -302,5 +302,11 @@ trait UtilTrait {
             ]);
         }
     }
+
+    function getRemainingCardsInHand() {
+        $playersIds = $this->getPlayersIds();
+        $playerId = $playersIds[0];
+        return count($this->getCardsByLocation('hand', $playerId));
+    }
     
 }

@@ -81,7 +81,6 @@ trait StateTrait {
         $table = $this->getCardsByLocation('table');
 
         usort($tableUnder, fn($a, $b) => $a->number - $b->number);
-        $this->incStat(1, 'playedCards');
 
         foreach ($tableUnder as $index => $cardUnder) {
             $this->cards->moveCard($cardUnder->id, 'tableUnder', $index);
@@ -130,14 +129,12 @@ trait StateTrait {
                 'incScore' => $logCard->points,
                 'preserve' => ['scoredCardObj'],
             ]);
-
-            $this->incStat(1, 'playedCards', $cardUnder->playerId);
         }
 
         $this->cards->moveAllCardsInLocationKeepOrder('tableUnder', 'table');
         self::notifyAllPlayers('moveTableLine', '', []);
 
-        $lastCard = in_array(intval($this->getStat('playedCards')), [6, 14, 23]);
+        $lastCard = $this->getRemainingCardsInHand() == 1;
         $this->gamestate->nextState($lastCard ? 'lastCard' : 'next');
     }
 
@@ -147,7 +144,6 @@ trait StateTrait {
         $costs = $this->getGlobalVariable(COSTS, true);
         $objectives = $this->getGlobalVariable(BONUS_OBJECTIVES, true) ?? [];
 
-        $this->incStat(1, 'playedCards');
         foreach ($hands as $card) {
             $playerId = $card->locationArg;
             $col = $this->getCol($playerId, $card->color);
@@ -171,8 +167,6 @@ trait StateTrait {
                 'incScore' => $logCard->points,
                 'preserve' => ['scoredCardObj'],
             ]);
-
-            $this->incStat(1, 'playedCards', $playerId);
         }
 
         $this->gamestate->nextState('endRound');

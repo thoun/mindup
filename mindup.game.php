@@ -175,7 +175,14 @@ class MindUp extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        $playedCards = intval($this->getStat('playedCards')); // 0 based, 24 cards played in total
+        $roundNumber = intval($this->getStat('roundNumber'));
+
+        if ($roundNumber >= 3) {
+            return 100;
+        }
+        
+        $remainingCardsInHand = $this->getRemainingCardsInHand();
+        $playedCards = [7, 15, 24][$roundNumber] - $remainingCardsInHand; // 0 based, 24 cards played in total
         return $playedCards * 100 / 24;
     }
 

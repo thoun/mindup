@@ -48,11 +48,6 @@
 */
 
 $commonStats = [
-    "playedCards" => [
-        "id" => 15,
-        "name" => totranslate("Played cards"),
-        "type" => "int"
-    ],
     "cardPoints" => [
         "id" => 20,
         "name" => totranslate("Points from card bonus/malus"),
