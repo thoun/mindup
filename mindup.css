@@ -597,6 +597,9 @@ body > .card {
 #table-center .label-top {
   margin-top: 32px;
 }
+#table-center #player-cards {
+  justify-content: space-evenly !important;
+}
 #table-center #player-cards .slot {
   border: 1px dashed white;
   background: rgba(255, 255, 255, 0.5333333333);
@@ -606,6 +609,12 @@ body > .card {
 #table-center #objectives {
   background: rgba(45, 41, 102, 0.8);
   border-radius: 8px;
+  margin-bottom: 40px;
+}
+#table-center hr {
+  margin: 28px;
+  border-color: #ffd752;
+  border-style: solid;
 }
 
 .player-board {

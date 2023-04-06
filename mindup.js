@@ -1321,7 +1321,9 @@ var TableCenter = /** @class */ (function () {
         gamedatas.selected.forEach(function (card) { return _this.playerCards.addCard(card, undefined, { visible: !!card.number }); });
         this.tableOver.addCards(gamedatas.table);
         playersIds.forEach(function (playerId) { return playerCardsDiv.querySelector("[data-slot-id=\"".concat(playerId, "\"]")).appendChild(_this.createPlayerBlock(playerId)); });
-        document.getElementById("objectives").classList.toggle('hidden', !gamedatas.objectives.length);
+        if (!gamedatas.objectives.length) {
+            document.getElementById("objectives").style.display = 'none';
+        }
         this.objectivesManager = new ObjectivesManager(this.game);
         this.objectives = new LineStock(this.objectivesManager, document.getElementById("objectives"));
         this.changeObjectives(gamedatas.objectives);

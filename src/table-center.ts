@@ -33,7 +33,9 @@ class TableCenter {
 
         playersIds.forEach(playerId => playerCardsDiv.querySelector(`[data-slot-id="${playerId}"]`).appendChild(this.createPlayerBlock(playerId)));
 
-        document.getElementById(`objectives`).classList.toggle('hidden', !gamedatas.objectives.length);
+        if (!gamedatas.objectives.length) {
+            document.getElementById(`objectives`).style.display = 'none';
+        }
         this.objectivesManager = new ObjectivesManager(this.game);
         this.objectives = new LineStock<number>(this.objectivesManager, document.getElementById(`objectives`));
         this.changeObjectives(gamedatas.objectives);
