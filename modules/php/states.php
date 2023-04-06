@@ -177,20 +177,58 @@ trait StateTrait {
 
         $roundNumber = $this->getStat('roundNumber');
         $lastRound = $roundNumber >= 3;
-        
 
+        // Header line
+        $headers = [''];
+        $pointsBefore = [ ['str' => clienttranslate('Points before this round'), 'args' => [] ] ];
+        $pointsScoreCards = [ ['str' => clienttranslate('Points from Score cards'), 'args' => [] ] ];
+        $pointsBonusMalus = [ ['str' => clienttranslate('Points from bonus/malus'), 'args' => [] ] ];
+        $pointsVariant = [ ['str' => clienttranslate('Points from bonus objectives'), 'args' => [] ] ];
+        $pointsAfter = [ ['str' => clienttranslate('Points after this round'), 'args' => [] ] ];
+
+        $costs = $this->getGlobalVariable(COSTS, true);
+        $objectives = $this->getGlobalVariable(BONUS_OBJECTIVES, true) ?? [];
+
+        // count points remaining in hands
         $playersIds = $this->getPlayersIds();
-        foreach ($playersIds as $playerId) {
+        foreach($playersIds as $playerId) {
+        
             $score = $this->getPlayerScore($playerId);
             $scoreAux = $this->getPlayerScoreAux($playerId);
+            $playerName = $this->getPlayerName($playerId);
+            $roundScoreDetail = $this->getPlayerScoreDetails($playerId, $costs, $objectives);
+
+            $headers[] = [
+                    'str' => '${player_name}',
+                    'args' => ['player_name' => $playerName],
+                    'type' => 'header'
+            ];
+            $pointsBefore[] = $score;
+            $pointsScoreCards[] = $roundScoreDetail['scoreCardsPoints'];
+            $pointsBonusMalus[] = $roundScoreDetail['bonusMalusPoints'];
+            $pointsVariant[] = $roundScoreDetail['objectivePoints'];
+            $pointsAfter[] = $score + $scoreAux;
+
             self::notifyAllPlayers('log', clienttranslate('${player_name} ends round ${roundNumber} with ${totalScore} points (${roundScore} points this round)'), [
                 'playerId' => $playerId,
-                'player_name' => $this->getPlayerName($playerId),
+                'player_name' => $playerName,
                 'roundNumber' => $roundNumber,
                 'totalScore' => $score + $scoreAux,
                 'roundScore' => $scoreAux,
             ]);
         }
+
+        $table = [$headers, $pointsBefore, $pointsScoreCards, $pointsBonusMalus, $pointsVariant, $pointsAfter];
+        if (count($objectives) == 0) {
+            array_splice($table, 4, 1); // remove variant line if no bonus objectives set
+        }
+
+        $this->notifyAllPlayers('tableWindow', '', [
+            "id" => 'finalScoring',
+            "title" =>  clienttranslate('Result of the round'),
+            "table" => $table,
+            "closing" => $lastRound ? clienttranslate("End of game") : clienttranslate("Next round"),
+        ]);
 
         // apply round score (scoreAux) to score
         $this->DbQuery("UPDATE player SET `player_score` = `player_score` + `player_score_aux`");
@@ -199,12 +237,6 @@ trait StateTrait {
     }
 
     function stEndScore() {
-        $playersIds = $this->getPlayersIds();
-
-        foreach($playersIds as $playerId) {
-            // TODO stats?
-        }
-
         $this->gamestate->nextState('endGame');
     }
 }

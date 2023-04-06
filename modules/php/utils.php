@@ -226,8 +226,10 @@ trait UtilTrait {
         return 0;
     }
 
-    function updatePlayerScore(int $playerId, array $costs, array $objectives) {
-        $roundScore = 0;
+    function getPlayerScoreDetails(int $playerId, array $costs, array $objectives) {
+        $scoreCardsPoints = 0;
+        $bonusMalusPoints = 0;
+        $objectivePoints = 0;
 
         $scoredCards = $this->getCardsByLocation('score'.$playerId);
         $cardsByColor = [
@@ -241,21 +243,25 @@ trait UtilTrait {
         for ($i=0; $i<5; $i++) {
             $scoresCardsOfColor = array_values(array_filter($scoredCards, fn($card) => $card->locationArg == $i));
             foreach ($scoresCardsOfColor as $card) {
-                $roundScore += $costs[$i] + $card->points;
+                $scoreCardsPoints += $costs[$i];
+                $bonusMalusPoints += $card->points;
                 $cardsByColor[$card->color][] = $card;
             }
         }
 
-        //$roundScoreBefore = $roundScore;
         foreach ($objectives as $objective) {
-            $roundScore += $this->getObjectivePoints($objective, $scoredCards, $cardsByColor, $costs);
+            $objectivePoints += $this->getObjectivePoints($objective, $scoredCards, $cardsByColor, $costs);
         }
+        return [
+            'scoreCardsPoints' => $scoreCardsPoints,
+            'bonusMalusPoints' => $bonusMalusPoints,
+            'objectivePoints' => $objectivePoints,
+            'roundScore' => $scoreCardsPoints + $bonusMalusPoints + $objectivePoints,
+        ];
+    }
 
-        /*$debug = [];
-        foreach ($objectives as $objective) {
-            $debug[$objective] = $this->getObjectivePoints($objective, $scoredCards, $cardsByColor, $costs);
-        }
-        self::notifyAllPlayers('log', json_encode([$playerId, $roundScoreBefore, $debug, $roundScore]), []);*/
+    function updatePlayerScore(int $playerId, array $costs, array $objectives) {
+        $roundScore = $this->getPlayerScoreDetails($playerId, $costs, $objectives)['roundScore'];
 
         $this->DbQuery("UPDATE player SET `player_score_aux` = $roundScore WHERE `player_id` = $playerId");
 
