@@ -153,6 +153,7 @@ class MindUp extends Table {
             }
         }
 
+        $result['roundNumber'] = intval($this->getStat('roundNumber')) + 1;
         $result['costs'] = $this->getGlobalVariable(COSTS, true);
 
         $selected = $this->getCardsByLocation('selected');

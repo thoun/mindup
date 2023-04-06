@@ -1433,8 +1433,6 @@ var LOCAL_STORAGE_ZOOM_KEY = 'MindUp-zoom';
 var MindUp = /** @class */ (function () {
     function MindUp() {
         this.playersTables = [];
-        this.handCounters = [];
-        this.scoredCounters = [];
         this.TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
     }
     /*
@@ -1453,6 +1451,10 @@ var MindUp = /** @class */ (function () {
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
+        document.getElementById("round-counter").insertAdjacentHTML('beforebegin', _("Round number:") + ' ');
+        this.roundCounter = new ebg.counter();
+        this.roundCounter.create("round-counter");
+        this.roundCounter.setValue(gamedatas.roundNumber);
         this.cardsManager = new CardsManager(this);
         this.animationManager = new AnimationManager(this);
         this.tableCenter = new TableCenter(this, gamedatas);
@@ -1619,6 +1621,8 @@ var MindUp = /** @class */ (function () {
         });
     };
     MindUp.prototype.notif_newRound = function (notif) {
+        console.log('notif_newRound', notif.args);
+        this.roundCounter.toValue(notif.args.number);
         this.playersTables.forEach(function (table) { return table.newRound(notif.args.costs); });
     };
     MindUp.prototype.notif_selectedCard = function (notif) {

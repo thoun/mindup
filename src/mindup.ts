@@ -18,9 +18,7 @@ class MindUp implements MindUpGame {
     private gamedatas: MindUpGamedatas;
     private tableCenter: TableCenter;
     private playersTables: PlayerTable[] = [];
-    private handCounters: Counter[] = [];
-    private scoredCounters: Counter[] = [];
-    private selectedCardId: number;
+    private roundCounter: Counter;
     
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
@@ -46,6 +44,12 @@ class MindUp implements MindUpGame {
         this.gamedatas = gamedatas;
 
         log('gamedatas', gamedatas);
+
+        document.getElementById(`round-counter`).insertAdjacentHTML('beforebegin', _("Round number:") + ' ');
+        this.roundCounter = new ebg.counter();
+        this.roundCounter.create(`round-counter`);
+        this.roundCounter.setValue(gamedatas.roundNumber);
+
 
         this.cardsManager = new CardsManager(this);
         this.animationManager = new AnimationManager(this);
@@ -243,6 +247,8 @@ class MindUp implements MindUpGame {
     }
 
     notif_newRound(notif: Notif<NotifNewRoundArgs>) {
+        console.log('notif_newRound', notif.args);
+        this.roundCounter.toValue(notif.args.number);
         this.playersTables.forEach(table => table.newRound(notif.args.costs));
     }
 

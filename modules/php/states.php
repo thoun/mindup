@@ -13,7 +13,8 @@ trait StateTrait {
 
     function stNewRound() {
         $this->DbQuery("UPDATE player SET `player_score_aux` = 0");
-        $firstRound = intval($this->getStat('roundNumber')) == 0;
+        $roundNumber = intval($this->getStat('roundNumber'));
+        $firstRound = $roundNumber == 0;
         $affectedCosts = [];
         $costs = [1, 2, 3, 4, 5];
 
@@ -36,6 +37,7 @@ trait StateTrait {
         if (!$firstRound) {
             self::notifyAllPlayers('newRound', clienttranslate('Scoring cards order have been changed'), [
                 'costs' => $affectedCosts,
+                'number' => $roundNumber + 1,
             ]);
             
             foreach ($playersIds as $playerId) {

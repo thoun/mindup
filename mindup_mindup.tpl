@@ -1,6 +1,8 @@
 {OVERALL_GAME_HEADER}
-
 <div id="table">
+    <div id="round-counter-row">
+        <div id="round-counter-block"><span id="round-counter"></span> / 3</div>
+    </div>
     <div id="tables-and-center">
         <div id="table-center">
             <div id="objectives" class="card-line"></div>

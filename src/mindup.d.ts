@@ -30,6 +30,7 @@ interface MindUpGamedatas {
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
+    roundNumber: number;
     selected: Card[];
     table: Card[];
     costs: number[];
@@ -66,6 +67,7 @@ interface EnteringPlayHandCardArgs {
 
 // newRound
 interface NotifNewRoundArgs {
+    number: number;
     costs: number[];
 }
 
