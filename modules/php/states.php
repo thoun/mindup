@@ -184,6 +184,7 @@ trait StateTrait {
         $pointsScoreCards = [ ['str' => clienttranslate('Points from Score cards'), 'args' => [] ] ];
         $pointsBonusMalus = [ ['str' => clienttranslate('Points from bonus/malus'), 'args' => [] ] ];
         $pointsVariant = [ ['str' => clienttranslate('Points from bonus objectives'), 'args' => [] ] ];
+        $pointsRound = [ ['str' => clienttranslate('Total points for this round'), 'args' => [] ] ];
         $pointsAfter = [ ['str' => clienttranslate('Points after this round'), 'args' => [] ] ];
 
         $costs = $this->getGlobalVariable(COSTS, true);
@@ -207,6 +208,7 @@ trait StateTrait {
             $pointsScoreCards[] = $roundScoreDetail['scoreCardsPoints'];
             $pointsBonusMalus[] = $roundScoreDetail['bonusMalusPoints'];
             $pointsVariant[] = $roundScoreDetail['objectivePoints'];
+            $pointsRound[] = $scoreAux;
             $pointsAfter[] = $score + $scoreAux;
 
             self::notifyAllPlayers('log', clienttranslate('${player_name} ends round ${roundNumber} with ${totalScore} points (${roundScore} points this round)'), [
@@ -218,7 +220,7 @@ trait StateTrait {
             ]);
         }
 
-        $table = [$headers, $pointsBefore, $pointsScoreCards, $pointsBonusMalus, $pointsVariant, $pointsAfter];
+        $table = [$headers, $pointsBefore, $pointsScoreCards, $pointsBonusMalus, $pointsVariant, $pointsRound, $pointsAfter];
         if (count($objectives) == 0) {
             array_splice($table, 4, 1); // remove variant line if no bonus objectives set
         }
