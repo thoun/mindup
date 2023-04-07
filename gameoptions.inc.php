@@ -60,6 +60,6 @@ require_once("modules/php/constants.inc.php");
                 'description' => totranslate('5 random objectives (set for the entire game)'),
             ],
         ],
-        'default' => 1,
+        'default' => 0,
     ],
 ];
