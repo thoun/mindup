@@ -52,7 +52,9 @@ class PlayerTable {
             this.hand.addCards(player.hand);
         }
         
-        this.setCosts(costs);
+        if (costs) {
+            this.setCosts(costs);
+        }
 
         for (let i=0; i<5; i++) {
             const scoreDiv = document.getElementById(`player-table-${this.playerId}-score${i}-cards`);
@@ -77,6 +79,7 @@ class PlayerTable {
             }
         }
 
+        console.log('newRound', costs)
         this.setCosts(costs);
     }
     

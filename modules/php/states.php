@@ -34,11 +34,13 @@ trait StateTrait {
         foreach ($playersIds as $playerId) {
             $this->cards->moveAllCardsInLocation('score'.$playerId, 'hand', null, $playerId);
         }
+        
+        self::notifyAllPlayers('newRound', $firstRound ? '' : clienttranslate('Scoring cards order have been changed'), [
+            'costs' => $affectedCosts,
+            'number' => $roundNumber + 1,
+        ]);
+
         if (!$firstRound) {
-            self::notifyAllPlayers('newRound', clienttranslate('Scoring cards order have been changed'), [
-                'costs' => $affectedCosts,
-                'number' => $roundNumber + 1,
-            ]);
             
             foreach ($playersIds as $playerId) {
                 $card = new Card($this->cards->pickCard('deck', $playerId));

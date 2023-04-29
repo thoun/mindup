@@ -1395,7 +1395,9 @@ var PlayerTable = /** @class */ (function () {
             };
             this.hand.addCards(player.hand);
         }
-        this.setCosts(costs);
+        if (costs) {
+            this.setCosts(costs);
+        }
         for (var i = 0; i < 5; i++) {
             var scoreDiv = document.getElementById("player-table-".concat(this.playerId, "-score").concat(i, "-cards"));
             this.scores[i] = new LineStock(this.game.cardsManager, scoreDiv, {
@@ -1417,6 +1419,7 @@ var PlayerTable = /** @class */ (function () {
                 this.scores[i].removeAll();
             }
         }
+        console.log('newRound', costs);
         this.setCosts(costs);
     };
     PlayerTable.prototype.setCosts = function (costs) {
