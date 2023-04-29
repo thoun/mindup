@@ -92,7 +92,11 @@ class Card {
         $this->points = $this->number ? $POINTS[($this->number - ($this->number >= 31 ? 0 : 1)) % 6] : null;
     } 
 
-    public static function onlyId(Card $card) {
+    public static function onlyId(?Card $card) {
+        if ($card == null) {
+            return null;
+        }
+
         return new Card([
             'card_id' => $card->id,
             'card_location' => $card->location,
