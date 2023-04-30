@@ -70,6 +70,11 @@ trait StateTrait {
     }
 
     function stRevealCards() {
+        $playersIds = $this->getPlayersIds();
+        foreach ($playersIds as $playerId) {
+            $this->giveExtraTime($playerId);
+        }
+
         $tableUnder = $this->getCardsByLocation('selected');
 
         self::notifyAllPlayers('delayBeforeReveal', '', []);
