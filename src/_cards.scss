@@ -30,26 +30,15 @@
                 background-image: url('img/cards.jpg');
             }
         }
-    }    
+    }
 
-    /*&.selectable:not(.disabled) {
-        cursor: pointer;
-        &:not(.selected) {
-            animation: selectable-card-animation 1s alternate infinite ease-in-out;
-        }
+    &.bga-cards_selectable-card {
+        box-shadow: 0 0 3px 3px white;
 
-        .card-side {
+        /*.card-side {
             box-shadow: unset;
-        }
-    }    
-
-    &.selected:not(.disabled) {
-        box-shadow: 0 0 5px 8px #e273f5;
-
-        .card-side {
-            box-shadow: unset;
-        }
-    } */
+        }*/
+    }
 
     @for $line from 0 through 5 {
         @for $col from 1 through 10 {

@@ -43,9 +43,9 @@ class PlayerTable {
                 sort: (a: Card, b: Card) => a.number - b.number,
             });
             this.hand.onCardClick = (card: Card) => {
-                if (handDiv.classList.contains('selectable')) {
+                if (handDiv.classList.contains('bga-cards_selectable-stock')) {
                     this.game.onHandCardClick(card);
-                    this.hand.getCards().forEach(c => this.hand.getCardElement(c).classList.toggle('selected', c.id == card.id));
+                    //this.hand.getCards().forEach(c => this.hand.getCardElement(c).classList.toggle('selected', c.id == card.id));
                 }
             }
             
@@ -67,7 +67,7 @@ class PlayerTable {
     } 
     
     public setSelectable(selectable: boolean) {
-        document.getElementById(`player-table-${this.playerId}-hand`).classList.toggle('selectable', selectable);
+        this.hand.setSelectionMode(selectable ? 'single' : 'none');
     }
 
     public newRound(costs: number[]): void {
@@ -79,7 +79,6 @@ class PlayerTable {
             }
         }
 
-        console.log('newRound', costs)
         this.setCosts(costs);
     }
     

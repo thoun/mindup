@@ -9,6 +9,7 @@ class CardsManager extends CardManager<Card> {
                 div.dataset.color = ''+card.color;
                 div.dataset.number = ''+card.number;
             },
+            isCardVisible: card => Boolean(card.number),
         });
     }
 }
