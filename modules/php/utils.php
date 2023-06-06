@@ -302,11 +302,9 @@ trait UtilTrait {
         $usedLetters = array_merge($usedLetters, $selectedLetters);
         $this->setGlobalVariable(USED_LETTERS, $usedLetters);
 
-        if (!$firstRound) {
-            self::notifyAllPlayers('newObjectives', clienttranslate('Bonus objective cards have been changed'), [
-                'objectives' => $objectives,
-            ]);
-        }
+        self::notifyAllPlayers('newObjectives', $firstRound ? '' : clienttranslate('Bonus objective cards have been changed'), [
+            'objectives' => $objectives,
+        ]);
     }
 
     function getRemainingCardsInHand() {

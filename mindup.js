@@ -1860,6 +1860,9 @@ var TableCenter = /** @class */ (function () {
         Array.from(document.querySelectorAll("#table-under .player-block")).forEach(function (elem) { return elem.remove(); });
     };
     TableCenter.prototype.changeObjectives = function (objectives) {
+        if (objectives.length) {
+            document.getElementById("objectives").style.removeProperty('display');
+        }
         this.objectives.removeAll();
         this.objectives.addCards(objectives);
     };
@@ -2123,62 +2126,69 @@ var MindUp = /** @class */ (function () {
             ['newObjectives', 1],
         ];
         notifs.forEach(function (notif) {
-            dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
+            dojo.subscribe(notif[0], _this, function (notifDetails) {
+                log("notif_".concat(notif[0]), notifDetails.args);
+                var promise = _this["notif_".concat(notif[0])](notifDetails.args);
+                // tell the UI notification ends, if the function returned a promise
+                promise === null || promise === void 0 ? void 0 : promise.then(function () { return _this.notifqueue.onSynchronousNotificationEnd(); });
+            });
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
+        if (isDebug) {
+            notifs.forEach(function (notif) {
+                if (!_this["notif_".concat(notif[0])]) {
+                    console.warn("notif_".concat(notif[0], " function is not declared, but listed in setupNotifications"));
+                }
+            });
+            Object.getOwnPropertyNames(MindUp.prototype).filter(function (item) { return item.startsWith('notif_'); }).map(function (item) { return item.slice(6); }).forEach(function (item) {
+                if (!notifs.some(function (notif) { return notif[0] == item; })) {
+                    console.warn("notif_".concat(item, " function is declared, but not listed in setupNotifications"));
+                }
+            });
+        }
     };
-    MindUp.prototype.notif_newRound = function (notif) {
-        console.log('notif_newRound', notif.args);
-        this.roundCounter.toValue(notif.args.number);
-        this.playersTables.forEach(function (table) { return table.newRound(notif.args.costs); });
+    MindUp.prototype.notif_newRound = function (args) {
+        this.roundCounter.toValue(args.number);
+        this.playersTables.forEach(function (table) { return table.newRound(args.costs); });
     };
-    MindUp.prototype.notif_selectedCard = function (notif) {
-        var currentPlayer = this.getPlayerId() == notif.args.playerId;
-        if (notif.args.card.number || !currentPlayer) {
-            if (notif.args.cancel) {
+    MindUp.prototype.notif_selectedCard = function (args) {
+        var currentPlayer = this.getPlayerId() == args.playerId;
+        if (args.card.number || !currentPlayer) {
+            if (args.cancel) {
                 if (currentPlayer) {
-                    this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+                    this.getCurrentPlayerTable().hand.addCard(args.card);
                 }
                 else {
-                    this.tableCenter.cancelPlacedCard(notif.args.card);
+                    this.tableCenter.cancelPlacedCard(args.card);
                 }
             }
             else {
-                this.tableCenter.setPlacedCard(notif.args.card, currentPlayer);
+                this.tableCenter.setPlacedCard(args.card, currentPlayer);
             }
         }
     };
     MindUp.prototype.notif_delayBeforeReveal = function () { };
-    MindUp.prototype.notif_revealCards = function (notif) {
-        this.tableCenter.revealCards(notif.args.cards);
+    MindUp.prototype.notif_revealCards = function (args) {
+        this.tableCenter.revealCards(args.cards);
     };
-    MindUp.prototype.notif_placeCardUnder = function (notif) {
-        this.tableCenter.placeCardUnder(notif.args.playerId, notif.args.card);
+    MindUp.prototype.notif_placeCardUnder = function (args) {
+        this.tableCenter.placeCardUnder(args.playerId, args.card);
     };
     MindUp.prototype.notif_delayAfterLineUnder = function () { };
-    MindUp.prototype.notif_scoreCard = function (notif) {
-        this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
-        this.setScore(notif.args.playerId, notif.args.playerScore);
+    MindUp.prototype.notif_scoreCard = function (args) {
+        this.getPlayerTable(args.playerId).placeScoreCard(args.card);
+        this.setScore(args.playerId, args.playerScore);
     };
     MindUp.prototype.notif_moveTableLine = function () {
         this.tableCenter.moveTableLine();
     };
     MindUp.prototype.notif_delayBeforeNewRound = function () { };
-    MindUp.prototype.notif_newCard = function (notif) {
-        this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+    MindUp.prototype.notif_newCard = function (args) {
+        this.getCurrentPlayerTable().hand.addCard(args.card);
     };
-    MindUp.prototype.notif_newObjectives = function (notif) {
-        this.tableCenter.changeObjectives(notif.args.objectives);
+    MindUp.prototype.notif_newObjectives = function (args) {
+        this.tableCenter.changeObjectives(args.objectives);
     };
-    /*private getColorName(color: number) {
-        switch (color) {
-            case 1: return _('Orange');
-            case 2: return _('Pink');
-            case 3: return _('Blue');
-            case 4: return _('Green');
-            case 5: return _('Purple');
-        }
-    }*/
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     MindUp.prototype.format_string_recursive = function (log, args) {

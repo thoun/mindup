@@ -84,6 +84,10 @@ class TableCenter {
     }
 
     public changeObjectives(objectives: number[]) {
+        if (objectives.length) {
+            document.getElementById(`objectives`).style.removeProperty('display');
+        }
+
         this.objectives.removeAll();
         this.objectives.addCards(objectives);
     }

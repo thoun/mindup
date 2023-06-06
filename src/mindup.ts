@@ -241,48 +241,68 @@ class MindUp implements MindUpGame {
         ];
     
         notifs.forEach((notif) => {
-            dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
+            dojo.subscribe(notif[0], this, (notifDetails: Notif<any>) => {
+                log(`notif_${notif[0]}`, notifDetails.args);
+
+                const promise = this[`notif_${notif[0]}`](notifDetails.args);
+
+                // tell the UI notification ends, if the function returned a promise
+                promise?.then(() => (this as any).notifqueue.onSynchronousNotificationEnd());
+            });
             (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
+
+        if (isDebug) {
+            notifs.forEach((notif) => {
+                if (!this[`notif_${notif[0]}`]) {
+                    console.warn(`notif_${notif[0]} function is not declared, but listed in setupNotifications`);
+                }
+            });
+
+            Object.getOwnPropertyNames(MindUp.prototype).filter(item => item.startsWith('notif_')).map(item => item.slice(6)).forEach(item => {
+                if (!notifs.some(notif => notif[0] == item)) {
+                    console.warn(`notif_${item} function is declared, but not listed in setupNotifications`);
+                }
+            });
+        }
     }
 
-    notif_newRound(notif: Notif<NotifNewRoundArgs>) {
-        console.log('notif_newRound', notif.args);
-        this.roundCounter.toValue(notif.args.number);
-        this.playersTables.forEach(table => table.newRound(notif.args.costs));
+    notif_newRound(args: NotifNewRoundArgs) {
+        this.roundCounter.toValue(args.number);
+        this.playersTables.forEach(table => table.newRound(args.costs));
     }
 
-    notif_selectedCard(notif: Notif<NotifSelectedCardArgs>) {
-        const currentPlayer = this.getPlayerId() == notif.args.playerId;
-        if (notif.args.card.number || !currentPlayer) {
-            if (notif.args.cancel) {
+    notif_selectedCard(args: NotifSelectedCardArgs) {
+        const currentPlayer = this.getPlayerId() == args.playerId;
+        if (args.card.number || !currentPlayer) {
+            if (args.cancel) {
                 if (currentPlayer) {
-                    this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+                    this.getCurrentPlayerTable().hand.addCard(args.card);
                 } else {
-                    this.tableCenter.cancelPlacedCard(notif.args.card);
+                    this.tableCenter.cancelPlacedCard(args.card);
                 }
             } else {
-                this.tableCenter.setPlacedCard(notif.args.card, currentPlayer);
+                this.tableCenter.setPlacedCard(args.card, currentPlayer);
             }
         }
     }
 
     notif_delayBeforeReveal() {}
 
-    notif_revealCards(notif: Notif<NotifRevealCardsArgs>) {
-        this.tableCenter.revealCards(notif.args.cards);
+    notif_revealCards(args: NotifRevealCardsArgs) {
+        this.tableCenter.revealCards(args.cards);
     }
 
-    notif_placeCardUnder(notif: Notif<NotifPlayerCardArgs>) {
-        this.tableCenter.placeCardUnder(notif.args.playerId, notif.args.card);
+    notif_placeCardUnder(args: NotifPlayerCardArgs) {
+        this.tableCenter.placeCardUnder(args.playerId, args.card);
     }
     
     notif_delayAfterLineUnder() {}
 
-    notif_scoreCard(notif: Notif<NotifScoredCardArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeScoreCard(notif.args.card);
+    notif_scoreCard(args: NotifScoredCardArgs) {
+        this.getPlayerTable(args.playerId).placeScoreCard(args.card);
 
-        this.setScore(notif.args.playerId, notif.args.playerScore);
+        this.setScore(args.playerId, args.playerScore);
     }
 
     notif_moveTableLine() {
@@ -291,23 +311,13 @@ class MindUp implements MindUpGame {
 
     notif_delayBeforeNewRound() {}
 
-    notif_newCard(notif: Notif<NotifPlayerCardArgs>) {
-        this.getCurrentPlayerTable().hand.addCard(notif.args.card);
+    notif_newCard(args: NotifPlayerCardArgs) {
+        this.getCurrentPlayerTable().hand.addCard(args.card);
     }
 
-    notif_newObjectives(notif: Notif<NotifNewObjectivesArgs>) {
-        this.tableCenter.changeObjectives(notif.args.objectives);
+    notif_newObjectives(args: NotifNewObjectivesArgs) {
+        this.tableCenter.changeObjectives(args.objectives);
     }
-
-    /*private getColorName(color: number) {
-        switch (color) {
-            case 1: return _('Orange');
-            case 2: return _('Pink');
-            case 3: return _('Blue');
-            case 4: return _('Green');
-            case 5: return _('Purple');
-        }
-    }*/
 
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
