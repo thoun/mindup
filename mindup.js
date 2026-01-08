@@ -2116,9 +2116,9 @@ var MindUp = /** @class */ (function () {
     */
     MindUp.prototype.setup = function (gamedatas) {
         log("Starting game setup");
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"round-counter-row\">\n                    <div id=\"round-counter-block\">".concat(_("Round number:"), " <span id=\"round-counter\"></span> / 3</div>\n                </div>\n                <div id=\"tables-and-center\">\n                    <div id=\"table-center\">\n                        <div id=\"objectives\" class=\"card-line\"></div>\n                        <div id=\"player-cards\" class=\"card-line label-top\"></div>\n                        <hr/>\n                        <div id=\"table-over\" class=\"card-line\"></div>\n                        <div id=\"table-under\" class=\"card-line label-top\"></div>\n                    </div>\n                    <div id=\"tables\"></div>\n                </div>\n            </div>\n        "));
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
-        document.getElementById("round-counter").insertAdjacentHTML('beforebegin', _("Round number:") + ' ');
         this.roundCounter = new ebg.counter();
         this.roundCounter.create("round-counter");
         this.roundCounter.setValue(gamedatas.roundNumber);
@@ -2135,7 +2135,6 @@ var MindUp = /** @class */ (function () {
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
         });
         this.setupNotifications();
-        this.setupPreferences();
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -2168,7 +2167,7 @@ var MindUp = /** @class */ (function () {
         var _this = this;
         if (stateName === 'chooseCard') {
             if (!this.isCurrentPlayerActive() && Object.keys(this.gamedatas.players).includes('' + this.getPlayerId())) { // ignore spectators
-                this.addActionButton("cancelChooseSecretMissions-button", _("I changed my mind"), function () { return _this.cancelChooseCard(); }, null, null, 'gray');
+                this.bga.statusBar.addActionButton(_("I changed my mind"), function () { return _this.bga.actions.performAction('actCancelChooseCard', null, { checkAction: false }); }, { color: 'secondary' });
             }
         }
     };
@@ -2194,23 +2193,6 @@ var MindUp = /** @class */ (function () {
         var _this = this;
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === _this.getPlayerId(); });
     };
-    MindUp.prototype.setupPreferences = function () {
-        var _this = this;
-        // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-        };
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
-    };
     MindUp.prototype.getOrderedPlayers = function (gamedatas) {
         var _this = this;
         var players = Object.values(gamedatas.players).sort(function (a, b) { return a.playerNo - b.playerNo; });
@@ -2234,26 +2216,7 @@ var MindUp = /** @class */ (function () {
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(score);
     };
     MindUp.prototype.onHandCardClick = function (card) {
-        this.chooseCard(card.id);
-    };
-    MindUp.prototype.chooseCard = function (id) {
-        /*if(!(this as any).checkAction('chooseCard')) {
-            return;
-        }*/
-        this.takeAction('chooseCard', {
-            id: id
-        });
-    };
-    MindUp.prototype.cancelChooseCard = function () {
-        /*if(!(this as any).checkAction('cancelChooseCard')) {
-            return;
-        }*/
-        this.takeAction('cancelChooseCard');
-    };
-    MindUp.prototype.takeAction = function (action, data) {
-        data = data || {};
-        data.lock = true;
-        this.ajaxcall("/mindup/mindup/".concat(action, ".html"), data, this, function () { });
+        this.bga.actions.performAction('actChooseCard', { id: card.id }, { checkAction: false });
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

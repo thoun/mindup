@@ -16,24 +16,27 @@
   *
   */
 
-
-require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
+use Bga\GameFramework\Actions\CheckAction;
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
+use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 
 require_once('modules/php/objects/card.php');
 require_once('modules/php/objects/player.php');
 require_once('modules/php/constants.inc.php');
 require_once('modules/php/utils.php');
-require_once('modules/php/actions.php');
 require_once('modules/php/states.php');
 require_once('modules/php/args.php');
 require_once('modules/php/debug-util.php');
 
 class MindUp extends Table {
     use UtilTrait;
-    use ActionTrait;
     use StateTrait;
     use ArgsTrait;
     use DebugUtilTrait;
+
+    public Deck $cards;
 
 	function __construct() {
         // Your global variables labels:
@@ -48,15 +51,9 @@ class MindUp extends Table {
             BONUS_OBJECTIVES_OPTION => BONUS_OBJECTIVES_OPTION,
         ]);   
 		
-        $this->cards = $this->getNew("module.common.deck");
-        $this->cards->init("card");
+        $this->cards = $this->deckFactory->createDeck("card");
         $this->cards->autoreshuffle = false;     
 	}
-	
-    protected function getGameName() {
-		// Used for translations and stuff. Please do not modify.
-        return "mindup";
-    }	
 
     /*
         setupNewGame:
@@ -107,10 +104,7 @@ class MindUp extends Table {
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
-        // TODO TEMP
-        //$this->debugSetup();
-
-        /************ End of the game initialization *****/
+        return \ST_NEW_ROUND;
     }
 
     /*
@@ -122,7 +116,7 @@ class MindUp extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $result = [];
     
         $currentPlayerId = intval(self::getCurrentPlayerId());    // !! We must only return informations visible by this player !!
@@ -134,7 +128,7 @@ class MindUp extends Table {
   
         // Gather all information about current game situation (visible by player $current_player_id).
 
-        $isEndScore = intval($this->gamestate->state_id()) >= ST_END_SCORE;
+        $isEndScore = $this->gamestate->getCurrentMainStateId() >= ST_END_SCORE;
         
         foreach($result['players'] as $playerId => &$player) {
             $player['playerNo'] = intval($player['playerNo']);
@@ -185,6 +179,35 @@ class MindUp extends Table {
         return $playedCards * 100 / 24;
     }
 
+    #[CheckAction(false)]
+    public function actChooseCard(int $id) {
+
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $playerHand = $this->getCardsByLocation('hand', $playerId);
+
+        if (!$this->array_some($playerHand, fn($card) => $card->id == $id)) {
+            throw new UserException("You must choose a card in your hand");
+        }
+
+        if ($this->getPlayerSelectedCard($playerId) !== null) {
+            $this->setPlayerSelectedCard($playerId, null);
+        }
+
+        $this->setPlayerSelectedCard($playerId, $id);
+
+        $this->gamestate->setPlayerNonMultiactive($playerId, 'end');
+    }
+
+    #[CheckAction(false)]
+    public function actCancelChooseCard() {
+        $playerId = intval($this->getCurrentPlayerId());
+
+        $this->setPlayerSelectedCard($playerId, null);
+
+        $this->gamestate->setPlayersMultiactive([$playerId], 'end', false);
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
 ////////////
@@ -230,7 +253,7 @@ class MindUp extends Table {
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new VisibleSystemException( "Zombie mode not supported at this game state: ".$statename );
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:

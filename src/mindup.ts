@@ -40,12 +40,28 @@ class MindUp implements MindUpGame {
 
     public setup(gamedatas: MindUpGamedatas) {
         log( "Starting game setup" );
+        (this as any).bga.gameArea.getElement().insertAdjacentHTML('beforeend', `
+            <div id="table">
+                <div id="round-counter-row">
+                    <div id="round-counter-block">${_("Round number:")} <span id="round-counter"></span> / 3</div>
+                </div>
+                <div id="tables-and-center">
+                    <div id="table-center">
+                        <div id="objectives" class="card-line"></div>
+                        <div id="player-cards" class="card-line label-top"></div>
+                        <hr/>
+                        <div id="table-over" class="card-line"></div>
+                        <div id="table-under" class="card-line label-top"></div>
+                    </div>
+                    <div id="tables"></div>
+                </div>
+            </div>
+        `);
         
         this.gamedatas = gamedatas;
 
         log('gamedatas', gamedatas);
 
-        document.getElementById(`round-counter`).insertAdjacentHTML('beforebegin', _("Round number:") + ' ');
         this.roundCounter = new ebg.counter();
         this.roundCounter.create(`round-counter`);
         this.roundCounter.setValue(gamedatas.roundNumber);
@@ -66,7 +82,6 @@ class MindUp implements MindUpGame {
         });
 
         this.setupNotifications();
-        this.setupPreferences();
 
         log( "Ending game setup" );
     }
@@ -103,7 +118,11 @@ class MindUp implements MindUpGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if (stateName === 'chooseCard') {
             if (!(this as any).isCurrentPlayerActive() && Object.keys(this.gamedatas.players).includes(''+this.getPlayerId())) { // ignore spectators
-                (this as any).addActionButton(`cancelChooseSecretMissions-button`, _("I changed my mind"), () => this.cancelChooseCard(), null, null, 'gray');
+                (this as any).bga.statusBar.addActionButton(
+                    _("I changed my mind"), 
+                    () => (this as any).bga.actions.performAction('actCancelChooseCard', null, { checkAction: false }), 
+                    { color: 'secondary' }
+                );
             }
         }
     }
@@ -137,28 +156,6 @@ class MindUp implements MindUpGame {
         return this.playersTables.find(playerTable => playerTable.playerId === this.getPlayerId());
     }
 
-    private setupPreferences() {
-        // Extract the ID and value from the UI control
-        const onchange = (e) => {
-          var match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
-          if (!match) {
-            return;
-          }
-          var prefId = +match[1];
-          var prefValue = +e.target.value;
-          (this as any).prefs[prefId].value = prefValue;
-        }
-        
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        
-        // Call onPreferenceChange() now
-        dojo.forEach(
-          dojo.query("#ingame_menu_content .preference_control"),
-          el => onchange({ target: el })
-        );
-    }
-
     private getOrderedPlayers(gamedatas: MindUpGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
         const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
@@ -184,31 +181,7 @@ class MindUp implements MindUpGame {
     }
 
     public onHandCardClick(card: Card): void {
-        this.chooseCard(card.id);
-    }
-  	
-    public chooseCard(id: number) {
-        /*if(!(this as any).checkAction('chooseCard')) {
-            return;
-        }*/
-
-        this.takeAction('chooseCard', {
-            id
-        });
-    }
-  	
-    public cancelChooseCard() {
-        /*if(!(this as any).checkAction('cancelChooseCard')) {
-            return;
-        }*/
-
-        this.takeAction('cancelChooseCard');
-    }
-
-    public takeAction(action: string, data?: any) {
-        data = data || {};
-        data.lock = true;
-        (this as any).ajaxcall(`/mindup/mindup/${action}.html`, data, this, () => {});
+        (this as any).bga.actions.performAction('actChooseCard', { id: card.id }, { checkAction: false });
     }
 
     ///////////////////////////////////////////////////

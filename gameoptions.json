@@ -1,0 +1,36 @@
+{
+    "100": {
+        "name": "Bonus objectives",
+        "values": [
+            {
+                "name": "Disabled"
+            },
+            {
+                "name": "1 random objective",
+                "tmdisplay": "1 random objective",
+                "description": "1 random objective (changing each round)"
+            },
+            {
+                "name": "2 random objectives",
+                "tmdisplay": "2 random objectives",
+                "description": "2 random objectives (changing each round)"
+            },
+            {
+                "name": "3 random objectives",
+                "tmdisplay": "3 random objectives",
+                "description": "3 random objectives (set for the entire game)"
+            },
+            {
+                "name": "4 random objectives",
+                "tmdisplay": "4 random objectives",
+                "description": "4 random objectives (set for the entire game)"
+            },
+            {
+                "name": "5 random objectives",
+                "tmdisplay": "5 random objectives",
+                "description": "5 random objectives (set for the entire game)"
+            }
+        ],
+        "default": 0
+    }
+}
